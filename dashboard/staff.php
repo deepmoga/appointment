@@ -141,24 +141,24 @@ if (!empty($staffMembers)) {
 }
 
 $activeNav = 'staff';
-$pageTitle = 'Staff';
+$pageTitle = 'Doctors';
 include __DIR__ . '/partials/head.php';
 ?>
 
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
   <p style="color:var(--gray-500);font-size:.9rem;max-width:520px;">
-    Manage your team — set who can perform which services, weekly working hours, and time off.
+    Manage your doctors — set who can perform which services, weekly working hours, and time off.
   </p>
-  <button class="btn btn-primary" data-modal-open="staffModal" onclick="resetStaffForm()">+ Add Staff</button>
+  <button class="btn btn-primary" data-modal-open="staffModal" onclick="resetStaffForm()">+ Add Doctor</button>
 </div>
 
 <?php if (empty($staffMembers)): ?>
   <div class="card">
     <div class="empty-state">
       <div class="empty-state-emoji">👥</div>
-      <div class="empty-state-title">No staff members yet</div>
-      <div class="empty-state-desc">Add your team so customers can be assigned to staff and you can manage individual schedules.</div>
-      <button class="btn btn-primary btn-sm" data-modal-open="staffModal" onclick="resetStaffForm()">+ Add Staff</button>
+      <div class="empty-state-title">No doctors yet</div>
+      <div class="empty-state-desc">Add your doctors so patients can be assigned to them and you can manage individual schedules.</div>
+      <button class="btn btn-primary btn-sm" data-modal-open="staffModal" onclick="resetStaffForm()">+ Add Doctor</button>
     </div>
   </div>
 <?php else: ?>
@@ -167,7 +167,7 @@ include __DIR__ . '/partials/head.php';
       <table class="data-table">
         <thead>
           <tr>
-            <th>Staff</th>
+            <th>Doctor</th>
             <th>Role</th>
             <th>Contact</th>
             <th>Services</th>
@@ -242,7 +242,7 @@ include __DIR__ . '/partials/head.php';
 <div class="modal-overlay" id="staffModal">
   <div class="modal modal-lg">
     <div class="modal-header">
-      <div class="modal-title" id="staffModalTitle">Add Staff Member</div>
+      <div class="modal-title" id="staffModalTitle">Add Doctor</div>
       <button class="modal-close" data-modal-close>✕</button>
     </div>
     <form method="POST">
@@ -348,7 +348,7 @@ include __DIR__ . '/partials/head.php';
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-outline" data-modal-close>Cancel</button>
-        <button type="submit" class="btn btn-primary" id="staffSubmitBtn">Save Staff Member</button>
+        <button type="submit" class="btn btn-primary" id="staffSubmitBtn">Save Doctor</button>
       </div>
     </form>
   </div>
@@ -468,7 +468,7 @@ document.querySelector('#staffModal form').addEventListener('submit', function()
 });
 
 function resetStaffForm() {
-  document.getElementById('staffModalTitle').textContent = 'Add Staff Member';
+  document.getElementById('staffModalTitle').textContent = 'Add Doctor';
   document.getElementById('st_id').value = '';
   document.getElementById('st_name').value = '';
   document.getElementById('st_role').value = '';
@@ -477,14 +477,14 @@ function resetStaffForm() {
   document.getElementById('st_bio').value = '';
   document.getElementById('st_color').value = '#6366f1';
   document.querySelectorAll('#staffModal .color-option').forEach((el,i) => el.classList.toggle('selected', i===0));
-  document.getElementById('staffSubmitBtn').textContent = 'Save Staff Member';
+  document.getElementById('staffSubmitBtn').textContent = 'Save Doctor';
   setSpecialty('');
   // Restore select name if it was removed
   document.getElementById('st_specialization').name = 'specialization';
 }
 
 function editStaff(st) {
-  document.getElementById('staffModalTitle').textContent = 'Edit Staff Member';
+  document.getElementById('staffModalTitle').textContent = 'Edit Doctor';
   document.getElementById('st_id').value = st.id;
   document.getElementById('st_name').value = st.name;
   document.getElementById('st_role').value = st.role || '';
@@ -493,7 +493,7 @@ function editStaff(st) {
   document.getElementById('st_bio').value = st.bio || '';
   document.getElementById('st_color').value = st.color || '#6366f1';
   document.querySelectorAll('#staffModal .color-option').forEach(el => el.classList.toggle('selected', el.dataset.value === st.color));
-  document.getElementById('staffSubmitBtn').textContent = 'Update Staff Member';
+  document.getElementById('staffSubmitBtn').textContent = 'Update Doctor';
   setSpecialty(st.specialization || '');
   // Restore select name if it was removed
   document.getElementById('st_specialization').name = 'specialization';

@@ -20,7 +20,7 @@ $navGroups = [
     'Management' => [
         ['key' => 'categories', 'icon' => '🗂️', 'label' => 'Categories',     'href' => 'categories.php'],
         ['key' => 'services',   'icon' => '🛍️', 'label' => 'Services',       'href' => 'services.php'],
-        ['key' => 'staff',      'icon' => '👥', 'label' => 'Staff',          'href' => 'staff.php'],
+        ['key' => 'staff',      'icon' => '👨‍⚕️', 'label' => 'Doctors',        'href' => 'staff.php'],
         ['key' => 'hours',      'icon' => '⏰', 'label' => 'Business Hours', 'href' => 'hours.php'],
     ],
     'Engagement' => [
