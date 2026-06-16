@@ -12,10 +12,10 @@ if (isset($_GET['db'])) {
     foreach ($rows as $r) echo "  biz#{$r['id']}: {$r['name']} ({$r['email']})\n";
     echo "\n=== whatsapp_configs ===\n";
     try {
-        $rows = db()->query("SELECT business_id, phone_number_id, display_name, whatsapp_number, is_connected FROM whatsapp_configs")->fetchAll();
+        $rows = db()->query("SELECT business_id, phone_number_id, display_name, phone_number, is_connected, LEFT(access_token,20) as token_preview FROM whatsapp_configs")->fetchAll();
         if (empty($rows)) echo "  (empty)\n";
         foreach ($rows as $r) {
-            echo "  biz#{$r['business_id']}: pid={$r['phone_number_id']} | {$r['display_name']} | {$r['whatsapp_number']} | connected={$r['is_connected']}\n";
+            echo "  biz#{$r['business_id']}: pid={$r['phone_number_id']} | {$r['display_name']} | {$r['phone_number']} | connected={$r['is_connected']} | token={$r['token_preview']}...\n";
         }
     } catch (Exception $e) { echo "  ERROR: " . $e->getMessage() . "\n"; }
 
