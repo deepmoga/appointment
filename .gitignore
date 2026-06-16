@@ -1,0 +1,18 @@
+# Installer artifacts
+.installed
+*.zip
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# PHP local config overrides (keep config.php template but not local secrets)
+# includes/config.php   # uncomment if you add a config.example.php
+
+# Uploads directory (if you add one later)
+uploads/
+
+# Logs
+*.log
