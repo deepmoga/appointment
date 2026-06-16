@@ -8,8 +8,8 @@ Thumbs.db
 *.swp
 *.swo
 
-# PHP local config overrides (keep config.php template but not local secrets)
-# includes/config.php   # uncomment if you add a config.example.php
+# PHP local config overrides — never commit live credentials
+includes/config.php
 
 # Uploads directory (if you add one later)
 uploads/

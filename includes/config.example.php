@@ -1,13 +1,13 @@
 <?php
 define('APP_NAME',    'BookWA');
 define('APP_TAGLINE', 'Automate Appointments. Power Growth.');
-define('APP_URL',     'http://localhost/github/Appointment');
+define('APP_URL',     'https://yourdomain.com');   // ← apna domain
 define('APP_VERSION', '1.0.0');
 
 define('DB_HOST',    'localhost');
-define('DB_USER',    'root');
-define('DB_PASS',    '');
-define('DB_NAME',    'appointment_system');
+define('DB_USER',    'your_db_user');              // ← apna DB user
+define('DB_PASS',    'your_db_password');          // ← apna DB password
+define('DB_NAME',    'your_db_name');              // ← apna DB name
 define('DB_CHARSET', 'utf8mb4');
 
 ini_set('session.cookie_httponly', 1);
