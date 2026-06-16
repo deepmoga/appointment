@@ -25,12 +25,25 @@ if (isset($_GET['db'])) {
         foreach ($cols as $c) echo "  {$c['Field']} | {$c['Type']} | Key={$c['Key']} | Null={$c['Null']}\n";
     } catch (Exception $e) { echo "  ERROR: " . $e->getMessage() . "\n"; }
 
-    echo "\n=== Test INSERT into whatsapp_configs ===\n";
+    echo "\n=== appointments.status column ===\n";
     try {
-        db()->prepare("INSERT INTO whatsapp_configs (business_id, phone_number_id, waba_id, access_token, webhook_verify_token, phone_number, display_name, is_connected) VALUES (?,?,?,?,?,?,?,0) ON DUPLICATE KEY UPDATE phone_number_id=VALUES(phone_number_id)")
-            ->execute([2, '1111279842076702', 'test_waba', 'test_token', 'test_verify', '+91 89688 90109', 'Rajeev Hospital']);
-        echo "  INSERT OK — rows: " . db()->query("SELECT COUNT(*) FROM whatsapp_configs")->fetchColumn() . "\n";
-    } catch (Exception $e) { echo "  INSERT ERROR: " . $e->getMessage() . "\n"; }
+        $col = db()->query("SHOW COLUMNS FROM appointments LIKE 'status'")->fetch();
+        echo "  Type: " . ($col['Type'] ?? 'NOT FOUND') . "\n";
+    } catch (Exception $e) { echo "  ERROR: " . $e->getMessage() . "\n"; }
+
+    echo "\n=== Git HEAD on server ===\n";
+    $gitHead = @file_get_contents(__DIR__ . '/.git/refs/heads/main');
+    echo "  " . ($gitHead ? trim($gitHead) : 'cannot read') . "\n";
+
+    echo "\n=== Fix: ALTER appointments.status ENUM ===\n";
+    if (isset($_GET['fix'])) {
+        try {
+            db()->exec("ALTER TABLE appointments MODIFY COLUMN status ENUM('pending','pending_payment','confirmed','in_progress','completed','cancelled','no_show') NOT NULL DEFAULT 'pending'");
+            echo "  ALTER OK — pending_payment added to ENUM\n";
+        } catch (Exception $e) { echo "  ALTER ERROR: " . $e->getMessage() . "\n"; }
+    } else {
+        echo "  Add ?fix=1 to run ALTER TABLE\n";
+    }
     exit;
 }
 
