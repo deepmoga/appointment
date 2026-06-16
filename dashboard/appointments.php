@@ -208,12 +208,20 @@ $totalPages = max(1, (int)ceil($totalRows / $perPage));
 $page       = min($page, $totalPages);
 $offset     = ($page - 1) * $perPage;
 
-$orderBy = $filterDate !== '' ? "a.appointment_time ASC" : "a.appointment_date DESC, a.appointment_time DESC";
+$orderBy = $filterDate !== ''
+    ? "IF(HOUR(a.appointment_time) < 12, 0, 1) ASC, daily_seq ASC"
+    : "a.appointment_date DESC, IF(HOUR(a.appointment_time) < 12, 0, 1) ASC, daily_seq ASC";
 
 $sql = "
     SELECT a.*, c.name AS customer_name, c.phone AS customer_phone, c.email AS customer_email,
            s.name AS service_name, s.duration AS service_duration,
-           st.name AS staff_name, st.color AS staff_color
+           st.name AS staff_name, st.color AS staff_color,
+           IF(HOUR(a.appointment_time) < 12, 'M', 'E') AS session_prefix,
+           (SELECT COUNT(*) FROM appointments a2
+            WHERE a2.business_id = a.business_id
+              AND a2.appointment_date = a.appointment_date
+              AND IF(HOUR(a.appointment_time) < 12, HOUR(a2.appointment_time) < 12, HOUR(a2.appointment_time) >= 12)
+              AND a2.id <= a.id) AS daily_seq
     FROM appointments a
     LEFT JOIN customers c ON c.id = a.customer_id
     LEFT JOIN services  s ON s.id = a.service_id
@@ -310,6 +318,7 @@ include __DIR__ . '/partials/head.php';
       <table class="data-table">
         <thead>
           <tr>
+            <th>Booking #</th>
             <th><?= $tokenMode === 'daily' ? 'Token · Date' : 'Date &amp; Time' ?></th>
             <th>Customer</th>
             <th>Service</th>
@@ -322,7 +331,17 @@ include __DIR__ . '/partials/head.php';
         </thead>
         <tbody>
           <?php foreach ($appointments as $a): ?>
+          <?php
+            $bkPrefix = $a['session_prefix'] ?? (((int)substr($a['appointment_time'] ?? '09', 0, 2) < 12) ? 'M' : 'E');
+            $bkNum    = (int)($a['daily_seq'] ?? 0);
+            $bkLabel  = $bkNum > 0 ? $bkPrefix . str_pad((string)$bkNum, 3, '0', STR_PAD_LEFT) : '—';
+          ?>
           <tr>
+            <td>
+              <span style="font-weight:700;font-size:.95rem;color:<?= $bkPrefix === 'M' ? '#d97706' : '#7c3aed' ?>;">
+                <?= htmlspecialchars($bkLabel) ?>
+              </span>
+            </td>
             <td>
               <?php if ($tokenMode === 'daily' && !empty($a['daily_token'])): ?>
                 <div style="font-weight:700;color:var(--primary);font-size:1rem;">Token #<?= (int)$a['daily_token'] ?></div>
