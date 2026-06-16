@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/wallet.php';
 
 requireAuth();
 
@@ -27,6 +28,16 @@ try {
     $stmt->execute([$businessId]);
     $hasStaff = (int)$stmt->fetchColumn() > 0;
 } catch (Exception $e) {}
+
+// ─── Wallet info ───────────────────────────────────────────────────────────────
+$walletBalance  = getWalletBalance($businessId);
+$paymentMode    = $business['payment_mode'] ?? 'platform';
+$platformSettings = getPlatformSettings();
+$feePerBooking  = ($paymentMode === 'own')
+    ? (float)($platformSettings['fee_own_gateway'] ?? 5)
+    : (float)($platformSettings['fee_platform_gateway'] ?? 20);
+$remainingBookings = $feePerBooking > 0 ? floor($walletBalance / $feePerBooking) : 0;
+$lowBalance     = $walletBalance < ($feePerBooking * 5);
 
 $setupDone = $waConfigured && $hasServices && $hasStaff;
 
@@ -193,7 +204,7 @@ include __DIR__ . '/partials/head.php';
             <span class="quick-action-icon">🛍️</span> Add Service
           </a>
           <a href="staff.php" class="quick-action">
-            <span class="quick-action-icon">👥</span> Add Staff
+            <span class="quick-action-icon">👨‍⚕️</span> Add Doctor
           </a>
           <a href="whatsapp.php?tab=conversations" class="quick-action">
             <span class="quick-action-icon">📩</span> Send Message
@@ -205,28 +216,52 @@ include __DIR__ . '/partials/head.php';
       </div>
     </div>
 
-    <!-- WhatsApp status card -->
-    <div class="card">
-      <div class="card-header">
-        <span style="font-size:.95rem;font-weight:700;color:var(--gray-900);">WhatsApp Status</span>
+    <!-- Wallet card -->
+    <div class="card" style="<?= $lowBalance ? 'border-color:#fca5a5;' : '' ?>">
+      <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:.95rem;font-weight:700;color:var(--gray-900);">💰 Wallet</span>
+        <a href="wallet.php" class="btn btn-sm btn-outline">Recharge</a>
       </div>
       <div class="card-body">
-        <?php if ($waConfigured): ?>
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-            <span style="width:10px;height:10px;background:var(--wa);border-radius:50%;display:block;animation:pulse 2s infinite;"></span>
-            <span style="font-size:.875rem;font-weight:600;color:var(--wa-dark);">Connected & Active</span>
+        <?php if ($lowBalance): ?>
+          <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:.82rem;color:#991b1b;">
+            ⚠️ Low balance! Recharge to keep receiving bookings.
           </div>
-          <a href="whatsapp.php?tab=conversations" class="btn btn-outline btn-full btn-sm">View Conversations</a>
-        <?php else: ?>
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-            <span style="width:10px;height:10px;background:var(--gray-400);border-radius:50%;display:block;"></span>
-            <span style="font-size:.875rem;font-weight:600;color:var(--gray-500);">Not Connected</span>
-          </div>
-          <p style="font-size:.82rem;color:var(--gray-500);margin-bottom:14px;line-height:1.6;">
-            Connect your WhatsApp Business account to start accepting bookings through the bot.
-          </p>
-          <a href="whatsapp.php" class="btn btn-wa btn-full btn-sm">Connect WhatsApp</a>
         <?php endif; ?>
+
+        <div style="display:grid;gap:12px;">
+          <!-- Balance -->
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:<?= $lowBalance ? '#fef2f2' : '#f0fdf4' ?>;border-radius:10px;">
+            <div>
+              <div style="font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--gray-400);">Wallet Balance</div>
+              <div style="font-size:1.6rem;font-weight:800;color:<?= $lowBalance ? '#dc2626' : '#16a34a' ?>;line-height:1.2;">₹<?= number_format($walletBalance, 2) ?></div>
+            </div>
+            <div style="font-size:2rem;">💳</div>
+          </div>
+
+          <!-- Fee per booking -->
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--gray-50);border-radius:10px;">
+            <div>
+              <div style="font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--gray-400);">Fee Per Booking</div>
+              <div style="font-size:1.1rem;font-weight:700;color:var(--gray-800);">₹<?= number_format($feePerBooking, 0) ?></div>
+            </div>
+            <div style="font-size:.72rem;padding:4px 8px;border-radius:20px;font-weight:600;
+              <?= $paymentMode === 'own' ? 'background:#dbeafe;color:#1d4ed8;' : 'background:#ede9fe;color:#6d28d9;' ?>">
+              <?= $paymentMode === 'own' ? 'Own Gateway' : 'Platform Gateway' ?>
+            </div>
+          </div>
+
+          <!-- Remaining bookings -->
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--gray-50);border-radius:10px;">
+            <div>
+              <div style="font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--gray-400);">Remaining Bookings</div>
+              <div style="font-size:1.1rem;font-weight:700;color:<?= $remainingBookings < 5 ? '#dc2626' : 'var(--gray-800)' ?>;"><?= number_format($remainingBookings) ?></div>
+            </div>
+            <div style="font-size:1.4rem;"><?= $remainingBookings < 5 ? '🔴' : ($remainingBookings < 20 ? '🟡' : '🟢') ?></div>
+          </div>
+        </div>
+
+        <a href="wallet.php" class="btn btn-primary btn-full btn-sm" style="margin-top:14px;">View Wallet & Recharge →</a>
       </div>
     </div>
 
