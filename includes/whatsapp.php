@@ -384,6 +384,8 @@ function waStrings(): array {
             'payment_not_done'    => "❌ *Booking Not Confirmed*\n\n📌 Reason: Payment not received yet.\n\nPlease complete payment using the link sent above, or send *menu* to start again.\n\nFor help, contact us directly.",
             'checking_payment'    => "🔍 Checking payment status...",
             'payment_verified'    => "✅ Payment received! Confirming your booking...",
+            'choose_session'      => "🕐 Please select a time slot:",
+            'no_session_today'    => "Sorry, no more slots available for today.\n\nPlease send *menu* to book for tomorrow.",
             'welcome'             => "👋 Welcome to *{{business_name}}*!",
             'setting_up'          => "We're currently setting up our services. Please check back soon.",
             'choose_category'     => "Browse our services and select a category:",
@@ -427,6 +429,8 @@ function waStrings(): array {
             'payment_not_done'    => "❌ *बुकिंग कन्फर्म नहीं हुई*\n\n📌 कारण: भुगतान प्राप्त नहीं हुआ।\n\nऊपर भेजे लिंक से भुगतान करें या *menu* भेजें।",
             'checking_payment'    => "🔍 भुगतान की स्थिति जांच रहे हैं...",
             'payment_verified'    => "✅ भुगतान मिला! बुकिंग कन्फर्म हो रही है...",
+            'choose_session'      => "🕐 कृपया समय सत्र चुनें:",
+            'no_session_today'    => "क्षमा करें, आज के लिए कोई स्लॉट उपलब्ध नहीं है।\n\nकल के लिए बुक करने के लिए *menu* भेजें।",
             'welcome'             => "👋 *{{business_name}}* में आपका स्वागत है!",
             'setting_up'          => "हम अभी अपनी सेवाएं सेट कर रहे हैं। कृपया जल्द ही वापस देखें।",
             'choose_category'     => "हमारी सेवाएं देखें और एक श्रेणी चुनें:",
@@ -470,6 +474,8 @@ function waStrings(): array {
             'payment_not_done'    => "❌ *ਬੁਕਿੰਗ ਕਨਫਰਮ ਨਹੀਂ ਹੋਈ*\n\n📌 ਕਾਰਨ: ਭੁਗਤਾਨ ਨਹੀਂ ਮਿਲਿਆ।\n\nਉੱਪਰ ਭੇਜੇ ਲਿੰਕ ਨਾਲ ਭੁਗਤਾਨ ਕਰੋ ਜਾਂ *menu* ਭੇਜੋ।",
             'checking_payment'    => "🔍 ਭੁਗਤਾਨ ਦੀ ਸਥਿਤੀ ਜਾਂਚ ਰਹੇ ਹਾਂ...",
             'payment_verified'    => "✅ ਭੁਗਤਾਨ ਮਿਲਿਆ! ਬੁਕਿੰਗ ਕਨਫਰਮ ਹੋ ਰਹੀ ਹੈ...",
+            'choose_session'      => "🕐 ਕਿਰਪਾ ਕਰਕੇ ਸਮਾਂ ਚੁਣੋ:",
+            'no_session_today'    => "ਮਾਫ਼ ਕਰਨਾ, ਅੱਜ ਲਈ ਕੋਈ ਸਲੌਟ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।\n\nਕੱਲ੍ਹ ਲਈ ਬੁੱਕ ਕਰਨ ਲਈ *menu* ਭੇਜੋ।",
             'welcome'             => "👋 *{{business_name}}* ਵਿੱਚ ਜੀ ਆਇਆਂ ਨੂੰ!",
             'setting_up'          => "ਅਸੀਂ ਇਸ ਵੇਲੇ ਆਪਣੀਆਂ ਸੇਵਾਵਾਂ ਸੈੱਟਅਪ ਕਰ ਰਹੇ ਹਾਂ। ਕਿਰਪਾ ਕਰਕੇ ਜਲਦੀ ਹੀ ਦੁਬਾਰਾ ਚੈੱਕ ਕਰੋ।",
             'choose_category'     => "ਸਾਡੀਆਂ ਸੇਵਾਵਾਂ ਵੇਖੋ ਅਤੇ ਇੱਕ ਸ਼੍ਰੇਣੀ ਚੁਣੋ:",
@@ -633,42 +639,41 @@ function buildDoctorMenu(int $businessId): array {
 }
 
 function buildDocDateMenu(string $lang): array {
-    $today     = date('Y-m-d');
-    $tomorrow  = date('Y-m-d', strtotime('+1 day'));
-    $todayLbl  = wt($lang, 'today')    . ' (' . date('d M', strtotime($today))    . ')';
-    $tomorrLbl = wt($lang, 'tomorrow') . ' (' . date('d M', strtotime($tomorrow)) . ')';
-    return [
-        'dates' => [$today, $tomorrow],
-        'rows'  => [
-            ['id' => 'docdate_' . $today,    'title' => mb_substr($todayLbl,  0, 24)],
-            ['id' => 'docdate_' . $tomorrow, 'title' => mb_substr($tomorrLbl, 0, 24)],
-        ],
-    ];
+    $today    = date('Y-m-d');
+    $tomorrow = date('Y-m-d', strtotime('+1 day'));
+
+    // Evening last slot starts at 18:30 (6:30 PM) — after that today is fully over
+    $nowMinutes     = (int)date('H') * 60 + (int)date('i');
+    $eveningEndMins = 18 * 60 + 30; // 6:30 PM
+
+    $dates = []; $rows = [];
+
+    if ($nowMinutes < $eveningEndMins) {
+        $dates[] = $today;
+        $rows[]  = ['id' => 'docdate_' . $today, 'title' => mb_substr(wt($lang, 'today') . ' (' . date('d M') . ')', 0, 24)];
+    }
+
+    $dates[] = $tomorrow;
+    $rows[]  = ['id' => 'docdate_' . $tomorrow, 'title' => mb_substr(wt($lang, 'tomorrow') . ' (' . date('d M', strtotime($tomorrow)) . ')', 0, 24)];
+
+    return ['dates' => $dates, 'rows' => $rows];
 }
 
-function buildDocSlotSections(): array {
-    $morning = [
-        ['time' => '09:00:00', 'label' => '🌅 9:00 AM'],
-        ['time' => '09:30:00', 'label' => '🌅 9:30 AM'],
-        ['time' => '10:00:00', 'label' => '🌅 10:00 AM'],
-        ['time' => '10:30:00', 'label' => '🌅 10:30 AM'],
-        ['time' => '11:00:00', 'label' => '🌅 11:00 AM'],
-        ['time' => '11:30:00', 'label' => '🌅 11:30 AM'],
-    ];
-    $evening = [
-        ['time' => '17:00:00', 'label' => '🌇 5:00 PM'],
-        ['time' => '17:30:00', 'label' => '🌇 5:30 PM'],
-        ['time' => '18:00:00', 'label' => '🌇 6:00 PM'],
-        ['time' => '18:30:00', 'label' => '🌇 6:30 PM'],
-    ];
-    $allSlots = array_merge($morning, $evening);
-    return [
-        'slots'    => $allSlots,
-        'sections' => [
-            ['title' => '🌅 Morning  9 AM – 12 PM', 'rows' => array_map(fn($s) => ['id' => 'slot_' . $s['time'], 'title' => $s['label']], $morning)],
-            ['title' => '🌇 Evening  5 PM – 7 PM',  'rows' => array_map(fn($s) => ['id' => 'slot_' . $s['time'], 'title' => $s['label']], $evening)],
-        ],
-    ];
+function buildDocSessionButtons(string $date): array {
+    $today          = date('Y-m-d');
+    $isToday        = ($date === $today);
+    $nowMinutes     = (int)date('H') * 60 + (int)date('i');
+    $morningEndMins = 11 * 60 + 30; // 11:30 AM — last morning slot
+    $eveningEndMins = 18 * 60 + 30; // 6:30 PM  — last evening slot
+
+    $buttons = [];
+    if (!$isToday || $nowMinutes < $morningEndMins) {
+        $buttons[] = ['id' => 'session_morning', 'title' => '🌅 Morning (9-12)'];
+    }
+    if (!$isToday || $nowMinutes < $eveningEndMins) {
+        $buttons[] = ['id' => 'session_evening', 'title' => '🌇 Evening (5-7)'];
+    }
+    return $buttons;
 }
 
 function getDoctorConsultationService(int $businessId, int $staffId): ?array {
@@ -900,33 +905,42 @@ function processIncomingMessage(int $businessId, string $fromPhone, string $text
                 break;
             }
 
-            $slotData = buildDocSlotSections();
-            sendWhatsappInteractiveList(
+            // Show Morning / Evening buttons (filtered by current time if today)
+            $sessionBtns = buildDocSessionButtons($date);
+            if (empty($sessionBtns)) {
+                sendWhatsappMessage($businessId, $fromPhone, wt($lang, 'no_session_today'));
+                saveWhatsappSession($businessId, $fromPhone, 'idle', ['lang' => $lang]);
+                break;
+            }
+
+            sendWhatsappInteractiveButtons(
                 $businessId, $fromPhone,
-                wt($lang, 'choose_time', ['date' => formatDate($date)]),
-                wt($lang, 'select_time'),
-                $slotData['sections']
+                wt($lang, 'choose_session') . "\n📅 " . formatDate($date),
+                $sessionBtns
             );
-            saveWhatsappSession($businessId, $fromPhone, 'awaiting_slot_doc', array_merge($data, [
-                'date'  => $date,
-                'slots' => $slotData['slots'],
-            ]));
+            saveWhatsappSession($businessId, $fromPhone, 'awaiting_session_doc', array_merge($data, ['date' => $date]));
             break;
 
-        case 'awaiting_slot_doc':
-            $slots   = $data['slots'] ?? buildDocSlotSections()['slots'];
-            $slotIds = array_column($slots, 'time');
-            $time    = waResolveSelection($sel, 'slot_', $slotIds);
+        case 'awaiting_session_doc':
+            $date = $data['date'] ?? date('Y-m-d');
 
-            if ($time === null) {
-                $slotData = buildDocSlotSections();
-                sendWhatsappInteractiveList($businessId, $fromPhone, wt($lang, 'invalid_option') . "\n\n" . wt($lang, 'choose_time', ['date' => formatDate($data['date'] ?? date('Y-m-d'))]), wt($lang, 'select_time'), $slotData['sections']);
-                saveWhatsappSession($businessId, $fromPhone, 'awaiting_slot_doc', array_merge($data, ['slots' => $slotData['slots']]));
+            if ($sel === 'session_morning' || str_contains($lower, 'morning') || str_contains($lower, 'subah') || str_contains($lower, 'ਸਵੇਰ') || str_contains($lower, 'सुबह')) {
+                $time      = '09:00:00';
+                $timeLabel = '🌅 Morning (9 AM – 12 PM)';
+            } elseif ($sel === 'session_evening' || str_contains($lower, 'evening') || str_contains($lower, 'shaam') || str_contains($lower, 'ਸ਼ਾਮ') || str_contains($lower, 'शाम')) {
+                $time      = '17:00:00';
+                $timeLabel = '🌇 Evening (5 PM – 7 PM)';
+            } else {
+                $sessionBtns = buildDocSessionButtons($date);
+                sendWhatsappInteractiveButtons($businessId, $fromPhone, wt($lang, 'invalid_option') . "\n\n" . wt($lang, 'choose_session'), $sessionBtns);
                 break;
             }
 
             sendWhatsappMessage($businessId, $fromPhone, wt($lang, 'ask_name'));
-            saveWhatsappSession($businessId, $fromPhone, 'awaiting_patient_name', array_merge($data, ['time' => $time]));
+            saveWhatsappSession($businessId, $fromPhone, 'awaiting_patient_name', array_merge($data, [
+                'time'       => $time,
+                'time_label' => $timeLabel,
+            ]));
             break;
 
         case 'awaiting_patient_name':
