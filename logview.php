@@ -11,10 +11,26 @@ if (isset($_GET['db'])) {
     $rows = db()->query("SELECT id, name, email FROM businesses")->fetchAll();
     foreach ($rows as $r) echo "  biz#{$r['id']}: {$r['name']} ({$r['email']})\n";
     echo "\n=== whatsapp_configs ===\n";
-    $rows = db()->query("SELECT business_id, phone_number_id, display_name, whatsapp_number, is_connected FROM whatsapp_configs")->fetchAll();
-    foreach ($rows as $r) {
-        echo "  biz#{$r['business_id']}: pid={$r['phone_number_id']} | {$r['display_name']} | {$r['whatsapp_number']} | connected={$r['is_connected']}\n";
-    }
+    try {
+        $rows = db()->query("SELECT business_id, phone_number_id, display_name, whatsapp_number, is_connected FROM whatsapp_configs")->fetchAll();
+        if (empty($rows)) echo "  (empty)\n";
+        foreach ($rows as $r) {
+            echo "  biz#{$r['business_id']}: pid={$r['phone_number_id']} | {$r['display_name']} | {$r['whatsapp_number']} | connected={$r['is_connected']}\n";
+        }
+    } catch (Exception $e) { echo "  ERROR: " . $e->getMessage() . "\n"; }
+
+    echo "\n=== whatsapp_configs table structure ===\n";
+    try {
+        $cols = db()->query("SHOW COLUMNS FROM whatsapp_configs")->fetchAll();
+        foreach ($cols as $c) echo "  {$c['Field']} | {$c['Type']} | Key={$c['Key']} | Null={$c['Null']}\n";
+    } catch (Exception $e) { echo "  ERROR: " . $e->getMessage() . "\n"; }
+
+    echo "\n=== Test INSERT into whatsapp_configs ===\n";
+    try {
+        db()->prepare("INSERT INTO whatsapp_configs (business_id, phone_number_id, waba_id, access_token, webhook_verify_token, phone_number, display_name, is_connected) VALUES (?,?,?,?,?,?,?,0) ON DUPLICATE KEY UPDATE phone_number_id=VALUES(phone_number_id)")
+            ->execute([2, '1111279842076702', 'test_waba', 'test_token', 'test_verify', '+91 89688 90109', 'Rajeev Hospital']);
+        echo "  INSERT OK — rows: " . db()->query("SELECT COUNT(*) FROM whatsapp_configs")->fetchColumn() . "\n";
+    } catch (Exception $e) { echo "  INSERT ERROR: " . $e->getMessage() . "\n"; }
     exit;
 }
 
