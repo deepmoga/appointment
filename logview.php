@@ -2,6 +2,22 @@
 // Temporary log viewer — delete after use
 if (($_GET['k'] ?? '') !== 'bkwa2026') { http_response_code(403); exit('Forbidden'); }
 
+// DB check mode
+if (isset($_GET['db'])) {
+    header('Content-Type: text/plain');
+    require_once __DIR__ . '/includes/config.php';
+    require_once __DIR__ . '/includes/functions.php';
+    echo "=== businesses ===\n";
+    $rows = db()->query("SELECT id, name, email FROM businesses")->fetchAll();
+    foreach ($rows as $r) echo "  biz#{$r['id']}: {$r['name']} ({$r['email']})\n";
+    echo "\n=== whatsapp_configs ===\n";
+    $rows = db()->query("SELECT business_id, phone_number_id, display_name, whatsapp_number, is_connected FROM whatsapp_configs")->fetchAll();
+    foreach ($rows as $r) {
+        echo "  biz#{$r['business_id']}: pid={$r['phone_number_id']} | {$r['display_name']} | {$r['whatsapp_number']} | connected={$r['is_connected']}\n";
+    }
+    exit;
+}
+
 // Debug mode: check PHP errors in webhook includes
 if (isset($_GET['debug'])) {
     ini_set('display_errors', 1);
