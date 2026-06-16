@@ -779,6 +779,95 @@ function waLanguageButtons(int $businessId, string $fromPhone): void {
 
 // ─── Main conversation state machine ─────────────────────────────────────────────
 
+/**
+ * Handle incoming voice/audio message — transcribe + extract + confirm
+ */
+function processVoiceMessage(int $businessId, string $fromPhone, string $mediaId): void {
+    require_once __DIR__ . '/openai.php';
+
+    $session = getWhatsappSession($businessId, $fromPhone);
+    $data    = $session['session_data'] ?: [];
+    $lang    = $data['lang'] ?? 'hi';
+
+    // Get business access token
+    $cfg = getWhatsappConfig($businessId);
+    if (!$cfg || empty($cfg['access_token'])) {
+        sendWhatsappMessage($businessId, $fromPhone, "❌ Voice booking not available right now.");
+        return;
+    }
+
+    sendWhatsappMessage($businessId, $fromPhone, "🎙️ " . wt($lang, 'processing_voice', [], "Processing your voice message..."));
+
+    // Download audio
+    $audioFile = downloadWhatsappAudio($mediaId, $cfg['access_token']);
+    if (!$audioFile) {
+        sendWhatsappMessage($businessId, $fromPhone, "❌ " . wt($lang, 'voice_error', [], "Could not download voice message. Please try again."));
+        return;
+    }
+
+    // Transcribe
+    $transcript = transcribeAudio($audioFile, $lang);
+    if (!$transcript) {
+        sendWhatsappMessage($businessId, $fromPhone, "❌ " . wt($lang, 'voice_error', [], "Could not understand the voice message. Please try again or type your booking."));
+        return;
+    }
+
+    // Fetch active doctors
+    $stmt = db()->prepare("SELECT id, name, specialization FROM staff WHERE business_id = ? AND is_active = 1 ORDER BY name");
+    $stmt->execute([$businessId]);
+    $doctors = $stmt->fetchAll();
+
+    // Extract booking details
+    $extracted = extractBookingFromTranscript($transcript, $doctors);
+    if (!$extracted) {
+        sendWhatsappMessage($businessId, $fromPhone, wt($lang, 'voice_unclear', [], "I heard: \"_{$transcript}_\"\n\nCould not extract booking details. Please try again more clearly."));
+        return;
+    }
+
+    // Build confirmation message
+    $doctorName  = $extracted['doctor_name'] ?? null;
+    $date        = $extracted['date']        ?? null;
+    $session_str = $extracted['session']     ?? null;
+    $patientName = $extracted['patient_name'] ?? null;
+    $place       = $extracted['place']        ?? null;
+    $doctorId    = (int)($extracted['doctor_id'] ?? 0);
+
+    $sessionLabel = match($session_str) {
+        'morning' => '🌅 Morning (9–12)',
+        'evening' => '🌇 Evening (5–7)',
+        default   => null,
+    };
+
+    $confirmLines = [
+        "🎙️ *I heard:* \"_{$transcript}_\"",
+        "",
+        "📋 *Booking Details:*",
+        "👨‍⚕️ Doctor: " . ($doctorName   ?? '❓ Not detected'),
+        "📅 Date: "    . ($date          ? date('d M Y', strtotime($date)) : '❓ Not detected'),
+        "⏰ Session: " . ($sessionLabel   ?? '❓ Not detected'),
+        "👤 Patient: " . ($patientName   ?? '❓ Not detected'),
+        "📍 Place: "   . ($place         ?? '❓ Not detected'),
+    ];
+
+    $confirmMsg = implode("\n", $confirmLines) . "\n\n*Is this correct?*";
+
+    sendWhatsappInteractiveButtons($businessId, $fromPhone, $confirmMsg, [
+        ['id' => 'voice_confirm', 'title' => '✅ Yes, Book It'],
+        ['id' => 'voice_retry',   'title' => '🔄 Try Again'],
+        ['id' => 'voice_manual',  'title' => '✏️ Type Instead'],
+    ]);
+
+    saveWhatsappSession($businessId, $fromPhone, 'awaiting_voice_confirm', array_merge($data, [
+        'doctor_id'    => $doctorId,
+        'doctor_name'  => $doctorName,
+        'date'         => $date,
+        'session'      => $session_str,
+        'patient_name' => $patientName,
+        'place'        => $place,
+        'transcript'   => $transcript,
+    ]));
+}
+
 function processIncomingMessage(int $businessId, string $fromPhone, string $text, string $interactiveId = ''): void {
     $stmt = db()->prepare("SELECT name, currency, pricing_mode, fixed_price, time_required, token_mode FROM businesses WHERE id = ?");
     $stmt->execute([$businessId]);
@@ -868,6 +957,92 @@ function processIncomingMessage(int $businessId, string $fromPhone, string $text
             }
 
             sendDoctorMenu($businessId, $fromPhone, $lang, $businessName, $data);
+            break;
+
+        case 'awaiting_voice_confirm':
+            if ($sel === 'voice_confirm') {
+                // All details must be present — if missing, fall to manual
+                $vDate    = $data['date']         ?? null;
+                $vSession = $data['session']       ?? null;
+                $vDoctor  = (int)($data['doctor_id'] ?? 0);
+                $vName    = $data['patient_name']  ?? null;
+                $vPlace   = $data['place']         ?? null;
+
+                if (!$vDate || !$vSession || !$vDoctor || !$vName || !$vPlace) {
+                    sendWhatsappMessage($businessId, $fromPhone, "⚠️ Some details are missing. Let me guide you step by step.");
+                    sendDoctorMenu($businessId, $fromPhone, $lang, $businessName, $data);
+                    break;
+                }
+
+                $time      = ($vSession === 'morning') ? '09:00:00' : '17:00:00';
+                $service   = getDoctorConsultationService($businessId, $vDoctor);
+                $serviceId = $service ? (int)$service['id'] : null;
+                $fee       = $service ? (float)$service['price'] : 0.0;
+                $duration  = $service ? (int)$service['duration'] : 30;
+                $endTime   = minutesToTime(timeToMinutes($time) + $duration);
+
+                if (!hasEnoughBalance($businessId)) {
+                    sendWhatsappMessage($businessId, $fromPhone, wt($lang, 'something_wrong'));
+                    resetWhatsappSession($businessId, $fromPhone);
+                    break;
+                }
+
+                $customerId = findOrCreateCustomer($businessId, $fromPhone, $vName);
+                $stmt = db()->prepare("
+                    INSERT INTO appointments (business_id, customer_id, service_id, staff_id, appointment_date, appointment_time, end_time, duration, status, total_price, payment_status, booking_source)
+                    VALUES (?,?,?,?,?,?,?,?, 'pending', ?, 'unpaid', 'whatsapp_voice')
+                ");
+                $stmt->execute([$businessId, $customerId, $serviceId, $vDoctor, $vDate, $time, $endTime, $duration, $fee]);
+                $appointmentId = (int)db()->lastInsertId();
+                deductBookingFee($businessId, $appointmentId);
+
+                $sessionLabel = ($vSession === 'morning') ? 'M' : 'E';
+                $dailyNum     = getDailyBookingNumber($businessId, $appointmentId, $vDate, $time);
+                $apptNum      = $sessionLabel . str_pad((string)$dailyNum, 3, '0', STR_PAD_LEFT);
+
+                require_once __DIR__ . '/payment.php';
+                $paymentLink = null;
+                if ($fee > 0) {
+                    $paymentLink = createRazorpayPaymentLink($businessId, $fee, "Consultation - {$data['doctor_name']} - {$vDate}", $fromPhone, $vName, $appointmentId);
+                }
+
+                $vars = [
+                    'doctor_name'        => $data['doctor_name'] ?? '',
+                    'date'               => formatDate($vDate),
+                    'time'               => ($vSession === 'morning') ? '9:00 AM' : '5:00 PM',
+                    'patient_name'       => $vName,
+                    'place'              => $vPlace,
+                    'amount'             => number_format($fee, 0),
+                    'appointment_number' => $apptNum,
+                ];
+
+                if ($paymentLink) {
+                    $msg = wt($lang, 'payment_intro', $vars) . "\n\n👇 " . $paymentLink . "\n\n" . wt($lang, 'payment_pending_msg');
+                    sendWhatsappMessage($businessId, $fromPhone, $msg);
+                    saveWhatsappSession($businessId, $fromPhone, 'awaiting_payment', array_merge($data, [
+                        'appointment_id' => $appointmentId,
+                        'patient_name'   => $vName,
+                        'place'          => $vPlace,
+                        'date'           => $vDate,
+                        'time'           => $vars['time'],
+                        'amount'         => $fee,
+                        'payment_link'   => $paymentLink,
+                        'appt_num'       => $apptNum,
+                    ]), $appointmentId);
+                } else {
+                    db()->prepare("UPDATE appointments SET status='pending' WHERE id=?")->execute([$appointmentId]);
+                    sendWhatsappMessage($businessId, $fromPhone, wt($lang, 'payment_not_configured', $vars));
+                    saveWhatsappSession($businessId, $fromPhone, 'idle', ['lang' => $lang], $appointmentId);
+                }
+
+            } elseif ($sel === 'voice_retry') {
+                sendWhatsappMessage($businessId, $fromPhone, "🎙️ Please send your voice message again clearly.");
+                saveWhatsappSession($businessId, $fromPhone, 'idle', ['lang' => $lang]);
+
+            } else {
+                // voice_manual or anything else — go to normal flow
+                sendDoctorMenu($businessId, $fromPhone, $lang, $businessName, $data);
+            }
             break;
 
         case 'awaiting_language':

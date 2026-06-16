@@ -107,6 +107,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $text        = '';
                 $replyId     = '';
 
+                $audioMediaId = '';
+
                 switch ($type) {
                     case 'text':
                         $text = $msg['text']['body'] ?? '';
@@ -121,6 +123,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         break;
                     case 'button':
                         $text = $msg['button']['text'] ?? '';
+                        break;
+                    case 'audio':
+                        $audioMediaId = $msg['audio']['id'] ?? '';
+                        $text = '';
                         break;
                     default:
                         $text = '';
@@ -147,6 +153,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
 
                 logWhatsappMessage($resolvedBusinessId, $from, 'inbound', $type === 'text' ? 'text' : $type, $text ?: "[{$type} message]", $customerId, $waMessageId);
+
+                // Voice message → AI booking
+                if ($type === 'audio' && $audioMediaId !== '') {
+                    try {
+                        processVoiceMessage($resolvedBusinessId, $from, $audioMediaId);
+                        whLog('INFO', 'Voice message processed', ['biz' => $resolvedBusinessId]);
+                    } catch (Throwable $e) {
+                        whLog('ERROR', 'Voice exception: ' . $e->getMessage(), [
+                            'file' => basename($e->getFile()),
+                            'line' => $e->getLine(),
+                            'biz'  => $resolvedBusinessId,
+                        ]);
+                    }
+                    continue;
+                }
 
                 if ($text !== '' || $replyId !== '') {
                     try {
