@@ -483,14 +483,16 @@ function findOrCreateCustomer(int $businessId, string $phone, string $name = '',
     $row = $stmt->fetch();
 
     if ($row) {
-        if ($name !== '' || $email !== '') {
-            $sets = []; $params = [];
-            if ($name !== '')  { $sets[] = 'name = ?';  $params[] = $name; }
-            if ($email !== '') { $sets[] = 'email = ?'; $params[] = $email; }
-            if ($sets) {
-                $params[] = $row['id'];
-                $pdo->prepare("UPDATE customers SET " . implode(', ', $sets) . " WHERE id = ?")->execute($params);
-            }
+        // Only fill blank fields — never overwrite existing name/email
+        $stmt2 = $pdo->prepare("SELECT name, email FROM customers WHERE id = ?");
+        $stmt2->execute([$row['id']]);
+        $existing = $stmt2->fetch();
+        $sets = []; $params = [];
+        if ($name  !== '' && empty($existing['name']))  { $sets[] = 'name = ?';  $params[] = $name; }
+        if ($email !== '' && empty($existing['email'])) { $sets[] = 'email = ?'; $params[] = $email; }
+        if ($sets) {
+            $params[] = $row['id'];
+            $pdo->prepare("UPDATE customers SET " . implode(', ', $sets) . " WHERE id = ?")->execute($params);
         }
         return (int)$row['id'];
     }

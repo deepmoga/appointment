@@ -355,7 +355,7 @@ include __DIR__ . '/partials/head.php';
               </div>
             </td>
             <td>
-              <div style="font-weight:600;color:var(--gray-900);"><?= htmlspecialchars($a['customer_name'] ?: 'Unknown') ?></div>
+              <div style="font-weight:600;color:var(--gray-900);"><?= htmlspecialchars($a['patient_name'] ?: $a['customer_name'] ?: 'Unknown') ?></div>
               <div style="font-size:.8rem;color:var(--gray-400);"><?= htmlspecialchars($a['customer_phone']) ?></div>
             </td>
             <td>

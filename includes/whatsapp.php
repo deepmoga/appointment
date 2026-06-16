@@ -1040,10 +1040,10 @@ function processIncomingMessage(int $businessId, string $fromPhone, string $text
 
                 $customerId = findOrCreateCustomer($businessId, $fromPhone, $vName);
                 $stmt = db()->prepare("
-                    INSERT INTO appointments (business_id, customer_id, service_id, staff_id, appointment_date, appointment_time, end_time, duration, status, total_price, payment_status, booking_source)
-                    VALUES (?,?,?,?,?,?,?,?, 'pending', ?, 'unpaid', 'whatsapp_voice')
+                    INSERT INTO appointments (business_id, customer_id, patient_name, service_id, staff_id, appointment_date, appointment_time, end_time, duration, status, total_price, payment_status, booking_source)
+                    VALUES (?,?,?,?,?,?,?,?,?, 'pending', ?, 'unpaid', 'whatsapp_voice')
                 ");
-                $stmt->execute([$businessId, $customerId, $serviceId, $vDoctor, $vDate, $time, $endTime, $duration, $fee]);
+                $stmt->execute([$businessId, $customerId, $vName, $serviceId, $vDoctor, $vDate, $time, $endTime, $duration, $fee]);
                 $appointmentId = (int)db()->lastInsertId();
                 deductBookingFee($businessId, $appointmentId);
 
@@ -1240,12 +1240,12 @@ function processIncomingMessage(int $businessId, string $fromPhone, string $text
             $customerId = findOrCreateCustomer($businessId, $fromPhone, $patientName);
             try { db()->prepare("UPDATE customers SET language = ? WHERE id = ? AND language IS NULL")->execute([$lang, $customerId]); } catch (Exception $e) {}
 
-            // Create appointment (pending_payment)
+            // Create appointment (pending payment)
             $stmt = db()->prepare("
-                INSERT INTO appointments (business_id, customer_id, service_id, staff_id, appointment_date, appointment_time, end_time, duration, status, total_price, payment_status, booking_source)
-                VALUES (?,?,?,?,?,?,?,?, 'pending', ?, 'unpaid', 'whatsapp')
+                INSERT INTO appointments (business_id, customer_id, patient_name, service_id, staff_id, appointment_date, appointment_time, end_time, duration, status, total_price, payment_status, booking_source)
+                VALUES (?,?,?,?,?,?,?,?,?, 'pending', ?, 'unpaid', 'whatsapp')
             ");
-            $stmt->execute([$businessId, $customerId, $serviceId, $doctorId ?: null, $date, $time, $endTime, $duration, $fee]);
+            $stmt->execute([$businessId, $customerId, $patientName, $serviceId, $doctorId ?: null, $date, $time, $endTime, $duration, $fee]);
             $appointmentId = (int)db()->lastInsertId();
 
             deductBookingFee($businessId, $appointmentId);
