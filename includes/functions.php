@@ -21,10 +21,10 @@ function redirectIfLoggedIn(): void {
     }
 }
 
-function getCurrentBusiness(): ?array {
+function getCurrentBusiness(bool $fresh = false): ?array {
     if (!isLoggedIn()) return null;
     static $cache = null;
-    if ($cache !== null) return $cache;
+    if ($cache !== null && !$fresh) return $cache;
     $stmt = db()->prepare('SELECT * FROM businesses WHERE id = ? LIMIT 1');
     $stmt->execute([$_SESSION['business_id']]);
     $cache = $stmt->fetch() ?: null;
@@ -155,11 +155,17 @@ function getBusinessById(int $businessId): ?array {
 
 function getPlatformSettings(): array {
     $defaults = [
-        'currency_symbol' => '$',
-        'contact_phone'   => '',
-        'contact_email'   => '',
-        'demo_whatsapp'   => '',
-        'wa_verify_token' => '',
+        'currency_symbol'       => '$',
+        'contact_phone'         => '',
+        'contact_email'         => '',
+        'demo_whatsapp'         => '',
+        'wa_verify_token'       => '',
+        'rate_platform_gateway' => 20.00,
+        'rate_own_gateway'      => 5.00,
+        'min_recharge_amount'   => 100.00,
+        'low_balance_alert'     => 100.00,
+        'razorpay_key_id'       => '',
+        'razorpay_key_secret'   => '',
     ];
     try {
         $row = db()->query("SELECT * FROM platform_settings WHERE id = 1 LIMIT 1")->fetch();
@@ -173,9 +179,15 @@ function updatePlatformSettings(array $data): void {
     $sets = ['currency_symbol = ?', 'contact_phone = ?', 'contact_email = ?', 'demo_whatsapp = ?'];
     $vals = [$data['currency_symbol'], $data['contact_phone'], $data['contact_email'], $data['demo_whatsapp']];
 
-    if (array_key_exists('wa_verify_token', $data)) {
-        $sets[] = 'wa_verify_token = ?';
-        $vals[] = $data['wa_verify_token'];
+    $optionalFields = [
+        'wa_verify_token', 'rate_platform_gateway', 'rate_own_gateway',
+        'min_recharge_amount', 'low_balance_alert', 'razorpay_key_id', 'razorpay_key_secret',
+    ];
+    foreach ($optionalFields as $field) {
+        if (array_key_exists($field, $data) && $data[$field] !== null) {
+            $sets[] = "$field = ?";
+            $vals[] = $data[$field];
+        }
     }
 
     db()->prepare("
@@ -374,7 +386,7 @@ function createDefaultBusinessHours(int $businessId): void {
 
 function getSidebarBadgeCounts(int $businessId): array {
     $pdo = db();
-    $counts = ['pending' => 0, 'unread_messages' => 0];
+    $counts = ['pending' => 0, 'unread_messages' => 0, 'low_wallet' => false];
 
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM appointments WHERE business_id = ? AND status = 'pending'");
     $stmt->execute([$businessId]);
@@ -384,6 +396,14 @@ function getSidebarBadgeCounts(int $businessId): array {
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM whatsapp_messages WHERE business_id = ? AND direction='inbound' AND is_read = 0");
         $stmt->execute([$businessId]);
         $counts['unread_messages'] = (int)$stmt->fetchColumn();
+    } catch (Exception $e) {}
+
+    try {
+        $platform = getPlatformSettings();
+        $stmt = $pdo->prepare("SELECT wallet_balance FROM businesses WHERE id = ?");
+        $stmt->execute([$businessId]);
+        $balance = (float)$stmt->fetchColumn();
+        $counts['low_wallet'] = $balance < (float)($platform['low_balance_alert'] ?? 100);
     } catch (Exception $e) {}
 
     return $counts;

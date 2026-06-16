@@ -11,9 +11,10 @@ $initials = strtoupper(substr($admin['name'], 0, 2));
 
 $navGroups = [
     'Platform' => [
-        ['key' => 'dashboard',  'icon' => '📊', 'label' => 'Dashboard',  'href' => 'index.php'],
-        ['key' => 'businesses', 'icon' => '🏢', 'label' => 'Businesses', 'href' => 'businesses.php'],
-        ['key' => 'plans',      'icon' => '💳', 'label' => 'Subscription Plans', 'href' => 'plans.php'],
+        ['key' => 'dashboard',  'icon' => '📊', 'label' => 'Dashboard',          'href' => 'index.php'],
+        ['key' => 'businesses', 'icon' => '🏢', 'label' => 'Businesses',          'href' => 'businesses.php'],
+        ['key' => 'plans',      'icon' => '💳', 'label' => 'Subscription Plans',  'href' => 'plans.php'],
+        ['key' => 'pricing',    'icon' => '💰', 'label' => 'Pricing & Wallet',    'href' => 'pricing.php'],
     ],
     'Account' => [
         ['key' => 'settings', 'icon' => '⚙️', 'label' => 'Settings', 'href' => 'settings.php'],

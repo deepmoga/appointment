@@ -2,9 +2,7 @@
 /**
  * WhatsApp Cloud API helper + conversational booking bot.
  *
- * Requires config.php + functions.php to already be loaded (db(), getCategories(),
- * getServicesList(), getServiceStaffIds(), getAvailableSlots(), findOrCreateCustomer(),
- * formatPrice(), formatDate(), formatTime(), timeToMinutes(), minutesToTime()).
+ * Requires config.php + functions.php + wallet.php to already be loaded.
  */
 
 // ─── Default fallback message templates ────────────────────────────────────────
@@ -876,6 +874,13 @@ function processIncomingMessage(int $businessId, string $fromPhone, string $text
                 break;
             }
 
+            // Check wallet balance before creating the booking
+            if (!hasEnoughBalance($businessId)) {
+                sendWhatsappMessage($businessId, $fromPhone, wt($lang, 'something_wrong'));
+                resetWhatsappSession($businessId, $fromPhone);
+                break;
+            }
+
             $assignedStaff = $staffId > 0 ? $staffId : ($matched['staff_id'] ?? null);
             $duration  = (int)$service['duration'];
             $endTime   = $isDateOnly ? '00:00:00' : minutesToTime(timeToMinutes($time) + $duration);
@@ -895,6 +900,9 @@ function processIncomingMessage(int $businessId, string $fromPhone, string $text
             ");
             $stmt->execute([$businessId, $customerId, $serviceId, $assignedStaff, $date, $time, $endTime, $duration, $totalPrice, $dailyToken]);
             $appointmentId = (int)db()->lastInsertId();
+
+            // Deduct booking fee from wallet (non-blocking — booking already created)
+            deductBookingFee($businessId, $appointmentId);
 
             $staffName = '';
             if ($assignedStaff) {

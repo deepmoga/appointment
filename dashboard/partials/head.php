@@ -30,9 +30,12 @@ $navGroups = [
     'Insights' => [
         ['key' => 'analytics', 'icon' => '📈', 'label' => 'Analytics', 'href' => 'analytics.php'],
     ],
-    'Settings' => [
-        ['key' => 'settings',     'icon' => '⚙️', 'label' => 'Settings',     'href' => 'settings.php'],
+    'Billing' => [
+        ['key' => 'wallet',       'icon' => '💰', 'label' => 'Wallet',       'href' => 'wallet.php', 'badge_warn' => $badgeCounts['low_wallet']],
         ['key' => 'subscription', 'icon' => '💳', 'label' => 'Subscription', 'href' => 'settings.php#subscription'],
+    ],
+    'Settings' => [
+        ['key' => 'settings', 'icon' => '⚙️', 'label' => 'Settings', 'href' => 'settings.php'],
     ],
 ];
 ?><!DOCTYPE html>
@@ -68,6 +71,8 @@ $navGroups = [
             <?= htmlspecialchars($item['label']) ?>
             <?php if (!empty($item['badge'])): ?>
               <span class="nav-item-badge"><?= (int)$item['badge'] ?></span>
+            <?php elseif (!empty($item['badge_warn'])): ?>
+              <span class="nav-item-badge" style="background:var(--warning,#f59e0b);">!</span>
             <?php endif; ?>
           </a>
         <?php endforeach; ?>

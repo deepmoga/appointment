@@ -26,6 +26,11 @@ CREATE TABLE IF NOT EXISTS businesses (
     enable_parallel_bookings TINYINT(1) NOT NULL DEFAULT 0,
     subscription_plan ENUM('free','starter','pro','enterprise') DEFAULT 'free',
     subscription_ends_at TIMESTAMP NULL,
+    wallet_balance          DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    payment_mode            ENUM('platform','own') NOT NULL DEFAULT 'platform',
+    own_gateway_type        ENUM('razorpay','stripe') NULL,
+    own_razorpay_key_id     VARCHAR(255) NULL,
+    own_razorpay_key_secret VARCHAR(255) NULL,
     is_active       TINYINT(1) DEFAULT 1,
     email_verified_at TIMESTAMP NULL,
     verification_token VARCHAR(255),
@@ -53,7 +58,13 @@ CREATE TABLE IF NOT EXISTS platform_settings (
     contact_phone   VARCHAR(30)  DEFAULT '',
     contact_email   VARCHAR(255) DEFAULT '',
     demo_whatsapp   VARCHAR(30)  DEFAULT '',
-    wa_verify_token VARCHAR(255) DEFAULT '',
+    wa_verify_token        VARCHAR(255) DEFAULT '',
+    rate_platform_gateway  DECIMAL(8,2) NOT NULL DEFAULT 20.00,
+    rate_own_gateway       DECIMAL(8,2) NOT NULL DEFAULT 5.00,
+    min_recharge_amount    DECIMAL(10,2) NOT NULL DEFAULT 100.00,
+    low_balance_alert      DECIMAL(10,2) NOT NULL DEFAULT 100.00,
+    razorpay_key_id        VARCHAR(255) NULL,
+    razorpay_key_secret    VARCHAR(255) NULL,
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
@@ -339,6 +350,40 @@ CREATE TABLE IF NOT EXISTS availability_alerts (
     FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
     INDEX idx_biz_date (business_id, notify_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─── WALLET TRANSACTIONS ──────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS wallet_transactions (
+    id             INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    business_id    INT UNSIGNED NOT NULL,
+    type           ENUM('credit','debit') NOT NULL,
+    amount         DECIMAL(10,2) NOT NULL,
+    description    VARCHAR(255),
+    appointment_id INT UNSIGNED NULL,
+    reference_id   VARCHAR(255) NULL COMMENT 'Razorpay payment_id',
+    balance_after  DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE,
+    INDEX idx_business_created (business_id, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─── RECHARGE PACKAGES ────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS recharge_packages (
+    id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name        VARCHAR(100) NOT NULL,
+    amount      DECIMAL(10,2) NOT NULL COMMENT 'INR amount client pays',
+    credits     DECIMAL(10,2) NOT NULL COMMENT 'wallet credits added',
+    bonus       DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    description VARCHAR(255),
+    is_popular  TINYINT(1) NOT NULL DEFAULT 0,
+    is_active   TINYINT(1) NOT NULL DEFAULT 1,
+    sort_order  INT NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO recharge_packages (name, amount, credits, bonus, description, is_popular, sort_order) VALUES
+('Starter',    500.00,  500.00,    0.00, '25 bookings via platform gateway',  0, 1),
+('Popular',   1000.00, 1000.00,  100.00, '10% bonus — 55 bookings',           1, 2),
+('Business',  2500.00, 2500.00,  300.00, '12% bonus — best for growing biz',  0, 3),
+('Enterprise',5000.00, 5000.00, 1000.00, '20% bonus — lowest cost/booking',   0, 4);
 
 -- ─── SUBSCRIPTION PLANS ───────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS subscription_plans (
