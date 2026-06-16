@@ -790,6 +790,15 @@ function processIncomingMessage(int $businessId, string $fromPhone, string $text
         }
     }
 
+    // Language reset — clears saved language so selection screen shows again
+    $langResetTriggers = ['lang', 'language', 'bhasha', 'ਭਾਸ਼ਾ', 'भाषा'];
+    if (in_array($lower, $langResetTriggers, true)) {
+        resetWhatsappSession($businessId, $fromPhone);
+        waLanguageButtons($businessId, $fromPhone);
+        saveWhatsappSession($businessId, $fromPhone, 'awaiting_language', []);
+        return;
+    }
+
     // Global reset triggers (preserve language preference)
     $resetTriggers = ['menu', 'restart', 'cancel', 'hi', 'hello', 'hey', 'start', 'मेनू', 'शुरू', 'रद्द', 'नमस्ते', 'ਮੀਨੂ', 'ਸ਼ੁਰੂ', 'ਰੱਦ'];
     if ($state !== 'idle' && in_array($lower, $resetTriggers, true)) {
