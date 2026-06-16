@@ -166,7 +166,13 @@ function confirmBookingFromPayment(int $appointmentId, string $paymentId): void 
         'time'               => $data['time'] ?? $timeLabel,
         'patient_name'       => $data['patient_name'] ?? ($appt['cust_name'] ?? ''),
         'place'              => $data['place'] ?? '—',
-        'appointment_number' => formatAppointmentNumber($appointmentId),
+        'appointment_number' => (function() use ($businessId, $appointmentId, $appt) {
+            $t = $appt['appointment_time'] ?? '09:00:00';
+            $d = $appt['appointment_date'] ?? date('Y-m-d');
+            $label = ((int)substr($t, 0, 2) < 12) ? 'M' : 'E';
+            $num   = getDailyBookingNumber($businessId, $appointmentId, $d, $t);
+            return $label . str_pad((string)$num, 3, '0', STR_PAD_LEFT);
+        })(),
     ];
 
     sendWhatsappMessage($businessId, $phone, wt($lang, 'booking_confirmed_doc', $vars));

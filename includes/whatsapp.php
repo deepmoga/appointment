@@ -46,6 +46,27 @@ function formatAppointmentNumber(int $appointmentId): string {
     return '#' . str_pad((string)$appointmentId, 6, '0', STR_PAD_LEFT);
 }
 
+/**
+ * Daily serial number per session (morning/evening) per business.
+ * Morning = appointment_time < 12:00, Evening = 12:00+
+ * Resets to 1 every day.
+ */
+function getDailyBookingNumber(int $businessId, int $appointmentId, string $date, string $time): int {
+    $hour      = (int)substr($time, 0, 2);
+    $isMorning = ($hour < 12);
+    $timeClause = $isMorning ? 'HOUR(appointment_time) < 12' : 'HOUR(appointment_time) >= 12';
+
+    $stmt = db()->prepare("
+        SELECT COUNT(*) FROM appointments
+        WHERE business_id = ?
+          AND appointment_date = ?
+          AND $timeClause
+          AND id <= ?
+    ");
+    $stmt->execute([$businessId, $date, $appointmentId]);
+    return max(1, (int)$stmt->fetchColumn());
+}
+
 // ─── Config helpers ─────────────────────────────────────────────────────────────
 
 function getWhatsappConfig(int $businessId): ?array {
@@ -1003,7 +1024,9 @@ function processIncomingMessage(int $businessId, string $fromPhone, string $text
 
             deductBookingFee($businessId, $appointmentId);
 
-            $apptNum = formatAppointmentNumber($appointmentId);
+            $sessionLabel = ((int)substr($time, 0, 2) < 12) ? 'M' : 'E';
+            $dailyNum     = getDailyBookingNumber($businessId, $appointmentId, $date, $time);
+            $apptNum      = $sessionLabel . str_pad((string)$dailyNum, 3, '0', STR_PAD_LEFT);
 
             // Try Razorpay payment link
             require_once __DIR__ . '/payment.php';
