@@ -996,7 +996,7 @@ function processIncomingMessage(int $businessId, string $fromPhone, string $text
             // Create appointment (pending_payment)
             $stmt = db()->prepare("
                 INSERT INTO appointments (business_id, customer_id, service_id, staff_id, appointment_date, appointment_time, end_time, duration, status, total_price, payment_status, booking_source)
-                VALUES (?,?,?,?,?,?,?,?, 'pending_payment', ?, 'unpaid', 'whatsapp')
+                VALUES (?,?,?,?,?,?,?,?, 'pending', ?, 'unpaid', 'whatsapp')
             ");
             $stmt->execute([$businessId, $customerId, $serviceId, $doctorId ?: null, $date, $time, $endTime, $duration, $fee]);
             $appointmentId = (int)db()->lastInsertId();
