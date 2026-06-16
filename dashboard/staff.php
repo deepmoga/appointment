@@ -274,8 +274,60 @@ include __DIR__ . '/partials/head.php';
         </div>
 
         <div class="form-group">
-          <label class="form-label">Specialization</label>
-          <input type="text" name="specialization" id="st_specialization" class="form-control" placeholder="e.g. Cosmetic Dentistry, Hair Coloring">
+          <label class="form-label">Specialty / Specialization</label>
+          <select name="specialization" id="st_specialization" class="form-select" onchange="toggleCustomSpec(this)">
+            <option value="">— Select Specialty —</option>
+            <optgroup label="Medical Doctors">
+              <option value="General Physician">General Physician</option>
+              <option value="Cardiologist">Cardiologist (Heart)</option>
+              <option value="Dermatologist">Dermatologist (Skin)</option>
+              <option value="ENT Specialist">ENT Specialist</option>
+              <option value="Gastroenterologist">Gastroenterologist</option>
+              <option value="General Surgeon">General Surgeon</option>
+              <option value="Gynecologist">Gynecologist / Obstetrician</option>
+              <option value="Neurologist">Neurologist (Brain & Nerves)</option>
+              <option value="Ophthalmologist">Ophthalmologist (Eyes)</option>
+              <option value="Orthopedic Surgeon">Orthopedic Surgeon (Bones)</option>
+              <option value="Pediatrician">Pediatrician (Children)</option>
+              <option value="Psychiatrist">Psychiatrist (Mental Health)</option>
+              <option value="Pulmonologist">Pulmonologist (Lungs)</option>
+              <option value="Radiologist">Radiologist</option>
+              <option value="Urologist">Urologist</option>
+              <option value="Endocrinologist">Endocrinologist (Diabetes/Hormones)</option>
+              <option value="Oncologist">Oncologist (Cancer)</option>
+              <option value="Rheumatologist">Rheumatologist (Joints)</option>
+              <option value="Nephrologist">Nephrologist (Kidney)</option>
+              <option value="Anesthesiologist">Anesthesiologist</option>
+            </optgroup>
+            <optgroup label="Dental">
+              <option value="General Dentist">General Dentist</option>
+              <option value="Orthodontist">Orthodontist (Braces)</option>
+              <option value="Oral Surgeon">Oral Surgeon</option>
+              <option value="Endodontist">Endodontist (Root Canal)</option>
+              <option value="Periodontist">Periodontist (Gums)</option>
+            </optgroup>
+            <optgroup label="Allied Health">
+              <option value="Physiotherapist">Physiotherapist</option>
+              <option value="Dietitian / Nutritionist">Dietitian / Nutritionist</option>
+              <option value="Psychologist">Psychologist</option>
+              <option value="Occupational Therapist">Occupational Therapist</option>
+              <option value="Speech Therapist">Speech Therapist</option>
+              <option value="Radiographer">Radiographer</option>
+              <option value="Pharmacist">Pharmacist</option>
+            </optgroup>
+            <optgroup label="Wellness & Beauty">
+              <option value="Hair Stylist">Hair Stylist</option>
+              <option value="Hair Coloring Specialist">Hair Coloring Specialist</option>
+              <option value="Makeup Artist">Makeup Artist</option>
+              <option value="Skin Care Specialist">Skin Care Specialist</option>
+              <option value="Massage Therapist">Massage Therapist</option>
+              <option value="Yoga Instructor">Yoga Instructor</option>
+              <option value="Personal Trainer">Personal Trainer</option>
+              <option value="Nutritionist">Nutritionist</option>
+            </optgroup>
+            <option value="__other__">Other (type your own)</option>
+          </select>
+          <input type="text" id="st_specialization_custom" class="form-control" placeholder="Type your specialty" style="margin-top:8px;display:none;">
         </div>
 
         <div class="form-group">
@@ -383,6 +435,38 @@ include __DIR__ . '/partials/head.php';
 <script>
 const LEAVE_TYPE_LABELS = { vacation: 'Vacation', sick: 'Sick Leave', personal: 'Personal', other: 'Other' };
 
+const KNOWN_SPECS = Array.from(document.querySelectorAll('#st_specialization option')).map(o => o.value).filter(v => v && v !== '__other__');
+
+function setSpecialty(val) {
+  const sel = document.getElementById('st_specialization');
+  const custom = document.getElementById('st_specialization_custom');
+  if (!val) { sel.value = ''; custom.style.display = 'none'; custom.value = ''; return; }
+  if (KNOWN_SPECS.includes(val)) {
+    sel.value = val; custom.style.display = 'none'; custom.value = '';
+  } else {
+    sel.value = '__other__'; custom.style.display = 'block'; custom.value = val;
+  }
+}
+
+function toggleCustomSpec(sel) {
+  const custom = document.getElementById('st_specialization_custom');
+  if (sel.value === '__other__') { custom.style.display = 'block'; custom.focus(); }
+  else { custom.style.display = 'none'; custom.value = ''; }
+}
+
+// Before form submit — merge custom value into select
+document.querySelector('#staffModal form').addEventListener('submit', function() {
+  const sel = document.getElementById('st_specialization');
+  const custom = document.getElementById('st_specialization_custom');
+  if (sel.value === '__other__' && custom.value.trim()) {
+    // Create a hidden input so the custom value is submitted as "specialization"
+    sel.removeAttribute('name');
+    const hidden = document.createElement('input');
+    hidden.type = 'hidden'; hidden.name = 'specialization'; hidden.value = custom.value.trim();
+    this.appendChild(hidden);
+  }
+});
+
 function resetStaffForm() {
   document.getElementById('staffModalTitle').textContent = 'Add Staff Member';
   document.getElementById('st_id').value = '';
@@ -390,11 +474,13 @@ function resetStaffForm() {
   document.getElementById('st_role').value = '';
   document.getElementById('st_email').value = '';
   document.getElementById('st_phone').value = '';
-  document.getElementById('st_specialization').value = '';
   document.getElementById('st_bio').value = '';
   document.getElementById('st_color').value = '#6366f1';
   document.querySelectorAll('#staffModal .color-option').forEach((el,i) => el.classList.toggle('selected', i===0));
   document.getElementById('staffSubmitBtn').textContent = 'Save Staff Member';
+  setSpecialty('');
+  // Restore select name if it was removed
+  document.getElementById('st_specialization').name = 'specialization';
 }
 
 function editStaff(st) {
@@ -404,11 +490,13 @@ function editStaff(st) {
   document.getElementById('st_role').value = st.role || '';
   document.getElementById('st_email').value = st.email || '';
   document.getElementById('st_phone').value = st.phone || '';
-  document.getElementById('st_specialization').value = st.specialization || '';
   document.getElementById('st_bio').value = st.bio || '';
   document.getElementById('st_color').value = st.color || '#6366f1';
   document.querySelectorAll('#staffModal .color-option').forEach(el => el.classList.toggle('selected', el.dataset.value === st.color));
   document.getElementById('staffSubmitBtn').textContent = 'Update Staff Member';
+  setSpecialty(st.specialization || '');
+  // Restore select name if it was removed
+  document.getElementById('st_specialization').name = 'specialization';
   document.getElementById('staffModal').classList.add('open');
 }
 
