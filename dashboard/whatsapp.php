@@ -77,17 +77,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $verifyToken = bin2hex(random_bytes(16));
         }
 
+        // Reset is_connected only if phone_number_id or access_token actually changed
+        $existing = $existing ?: getWhatsappConfig($businessId);
+        $credentialsChanged = !$existing
+            || $existing['phone_number_id'] !== $phoneNumberId
+            || ($accessToken !== '' && $existing['access_token'] !== $accessToken);
+
         $stmt = db()->prepare("
             INSERT INTO whatsapp_configs (business_id, phone_number_id, waba_id, access_token, webhook_verify_token, phone_number, display_name, is_connected)
             VALUES (?,?,?,?,?,?,?,0)
             ON DUPLICATE KEY UPDATE
-                phone_number_id = VALUES(phone_number_id),
-                waba_id = VALUES(waba_id),
-                access_token = VALUES(access_token),
-                webhook_verify_token = VALUES(webhook_verify_token),
-                phone_number = VALUES(phone_number),
-                display_name = VALUES(display_name),
-                is_connected = 0
+                phone_number_id     = VALUES(phone_number_id),
+                waba_id             = VALUES(waba_id),
+                access_token        = VALUES(access_token),
+                webhook_verify_token= VALUES(webhook_verify_token),
+                phone_number        = VALUES(phone_number),
+                display_name        = VALUES(display_name),
+                is_connected        = IF(VALUES(phone_number_id) != phone_number_id OR VALUES(access_token) != access_token, 0, is_connected)
         ");
         $stmt->execute([$businessId, $phoneNumberId, $wabaId, $accessToken, $verifyToken, $phoneNumber, $displayName]);
 
