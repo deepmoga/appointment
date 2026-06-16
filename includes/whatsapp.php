@@ -819,12 +819,7 @@ function processVoiceMessage(int $businessId, string $fromPhone, string $mediaId
 
     // Extract booking details
     $extracted = extractBookingFromTranscript($transcript, $doctors);
-    if (!$extracted) {
-        sendWhatsappMessage($businessId, $fromPhone, wt($lang, 'voice_unclear', [], "I heard: \"_{$transcript}_\"\n\nCould not extract booking details. Please try again more clearly."));
-        return;
-    }
 
-    // Build confirmation message
     $doctorName  = $extracted['doctor_name'] ?? null;
     $date        = $extracted['date']        ?? null;
     $session_str = $extracted['session']     ?? null;
@@ -832,40 +827,96 @@ function processVoiceMessage(int $businessId, string $fromPhone, string $mediaId
     $place       = $extracted['place']        ?? null;
     $doctorId    = (int)($extracted['doctor_id'] ?? 0);
 
-    $sessionLabel = match($session_str) {
-        'morning' => '🌅 Morning (9–12)',
-        'evening' => '🌇 Evening (5–7)',
-        default   => null,
-    };
-
-    $confirmLines = [
-        "🎙️ *I heard:* \"_{$transcript}_\"",
-        "",
-        "📋 *Booking Details:*",
-        "👨‍⚕️ Doctor: " . ($doctorName   ?? '❓ Not detected'),
-        "📅 Date: "    . ($date          ? date('d M Y', strtotime($date)) : '❓ Not detected'),
-        "⏰ Session: " . ($sessionLabel   ?? '❓ Not detected'),
-        "👤 Patient: " . ($patientName   ?? '❓ Not detected'),
-        "📍 Place: "   . ($place         ?? '❓ Not detected'),
-    ];
-
-    $confirmMsg = implode("\n", $confirmLines) . "\n\n*Is this correct?*";
-
-    sendWhatsappInteractiveButtons($businessId, $fromPhone, $confirmMsg, [
-        ['id' => 'voice_confirm', 'title' => '✅ Yes, Book It'],
-        ['id' => 'voice_retry',   'title' => '🔄 Try Again'],
-        ['id' => 'voice_manual',  'title' => '✏️ Type Instead'],
-    ]);
-
-    saveWhatsappSession($businessId, $fromPhone, 'awaiting_voice_confirm', array_merge($data, [
-        'doctor_id'    => $doctorId,
+    // Base session data — save whatever we got from voice
+    $voiceData = array_merge($data, [
+        'doctor_id'    => $doctorId ?: null,
         'doctor_name'  => $doctorName,
         'date'         => $date,
         'session'      => $session_str,
         'patient_name' => $patientName,
         'place'        => $place,
         'transcript'   => $transcript,
-    ]));
+        'voice_mode'   => true,
+    ]);
+
+    // Show what was understood
+    $sessionLabel = match($session_str) {
+        'morning' => '🌅 Morning (9–12)',
+        'evening' => '🌇 Evening (5–7)',
+        default   => null,
+    };
+
+    $heardLines = ["🎙️ *Maine suna:* \"_{$transcript}_\"", ""];
+    if ($doctorName)  $heardLines[] = "👨‍⚕️ Doctor: *{$doctorName}*";
+    if ($date)        $heardLines[] = "📅 Date: *" . date('d M Y', strtotime($date)) . "*";
+    if ($sessionLabel) $heardLines[] = "⏰ Session: *{$sessionLabel}*";
+    if ($patientName) $heardLines[] = "👤 Patient: *{$patientName}*";
+    if ($place)       $heardLines[] = "📍 Place: *{$place}*";
+
+    // Check what is missing and ask for it one by one
+    if (!$doctorId || !$doctorName) {
+        sendWhatsappMessage($businessId, $fromPhone, implode("\n", $heardLines));
+        $dateMenu = buildDocDateMenu($lang);
+        $docMenu  = buildDoctorMenu($businessId);
+        if (empty($docMenu['rows'])) {
+            sendWhatsappMessage($businessId, $fromPhone, wt($lang, 'no_doctors'));
+            return;
+        }
+        sendWhatsappInteractiveList($businessId, $fromPhone, wt($lang, 'select_doctor'), wt($lang, 'select_doctor'), $docMenu['sections']);
+        saveWhatsappSession($businessId, $fromPhone, 'awaiting_doctor', $voiceData);
+        return;
+    }
+
+    if (!$date) {
+        sendWhatsappMessage($businessId, $fromPhone, implode("\n", $heardLines));
+        $dateMenu = buildDocDateMenu($lang);
+        if (empty($dateMenu['rows'])) {
+            sendWhatsappMessage($businessId, $fromPhone, wt($lang, 'no_session_today'));
+            return;
+        }
+        sendWhatsappInteractiveButtons($businessId, $fromPhone, wt($lang, 'choose_date'), $dateMenu['rows'], '📅 ' . $doctorName);
+        saveWhatsappSession($businessId, $fromPhone, 'awaiting_date_doc', $voiceData);
+        return;
+    }
+
+    if (!$session_str) {
+        sendWhatsappMessage($businessId, $fromPhone, implode("\n", $heardLines));
+        $sessionBtns = buildDocSessionButtons($date);
+        if (empty($sessionBtns)) {
+            sendWhatsappMessage($businessId, $fromPhone, wt($lang, 'no_session_today'));
+            return;
+        }
+        sendWhatsappInteractiveButtons($businessId, $fromPhone, wt($lang, 'choose_session') . "\n📅 " . formatDate($date), $sessionBtns);
+        saveWhatsappSession($businessId, $fromPhone, 'awaiting_session_doc', $voiceData);
+        return;
+    }
+
+    if (!$patientName) {
+        sendWhatsappMessage($businessId, $fromPhone, implode("\n", $heardLines));
+        sendWhatsappMessage($businessId, $fromPhone, wt($lang, 'ask_name'));
+        saveWhatsappSession($businessId, $fromPhone, 'awaiting_patient_name', $voiceData);
+        return;
+    }
+
+    if (!$place) {
+        sendWhatsappMessage($businessId, $fromPhone, implode("\n", $heardLines));
+        sendWhatsappMessage($businessId, $fromPhone, wt($lang, 'ask_place'));
+        saveWhatsappSession($businessId, $fromPhone, 'awaiting_place', $voiceData);
+        return;
+    }
+
+    // All details present — show full confirmation
+    $confirmLines = array_merge($heardLines, [
+        "",
+        "*Kya yeh sahi hai?*",
+    ]);
+
+    sendWhatsappInteractiveButtons($businessId, $fromPhone, implode("\n", $confirmLines), [
+        ['id' => 'voice_confirm', 'title' => '✅ Confirm'],
+        ['id' => 'voice_retry',   'title' => '🔄 Try Again'],
+    ]);
+
+    saveWhatsappSession($businessId, $fromPhone, 'awaiting_voice_confirm', $voiceData);
 }
 
 function processIncomingMessage(int $businessId, string $fromPhone, string $text, string $interactiveId = ''): void {
