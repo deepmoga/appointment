@@ -16,3 +16,6 @@ uploads/
 
 # Logs
 *.log
+
+# Auto-deploy webhook (server-only, contains secret)
+deploy.php
