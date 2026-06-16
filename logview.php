@@ -3,9 +3,13 @@
 if (($_GET['k'] ?? '') !== 'bkwa2026') { http_response_code(403); exit('Forbidden'); }
 $log = __DIR__ . '/logs/webhook.log';
 header('Content-Type: text/plain; charset=utf-8');
-if (!file_exists($log)) { echo "Log file not found: $log\n\nChecking if logs/ dir exists: ";
-    echo is_dir(__DIR__.'/logs') ? "YES (dir exists but no log file yet)\n" : "NO (logs/ dir does not exist)\n";
-    echo "\nwritable check: " . (is_writable(__DIR__) ? "public_html is writable" : "NOT writable") . "\n";
+if (!file_exists($log)) {
+    // Try to create the logs dir and write a test entry
+    @mkdir(dirname($log), 0755, true);
+    file_put_contents($log, date('Y-m-d H:i:s') . " [TEST] Log file created by logview.php\n", FILE_APPEND | LOCK_EX);
+    echo "Log was just initialized. Send a WhatsApp message now and refresh this page.\n\n";
+    echo "logs/ dir exists: " . (is_dir(dirname($log)) ? "YES\n" : "NO — mkdir failed\n");
+    echo "log writable: " . (is_writable(dirname($log)) ? "YES\n" : "NO\n");
     exit;
 }
 $lines = file($log);
