@@ -373,6 +373,17 @@ function waStrings(): array {
     return [
         'en' => [
             'choose_language'     => "🌐 Please select your language:",
+            'choose_doctor'       => "👨‍⚕️ Please select a doctor:",
+            'select_doctor'       => "Select Doctor",
+            'no_doctors'          => "Sorry, no doctors are available right now.\n\nPlease try again later or contact us directly.",
+            'ask_place'           => "📍 Please tell us your city or area:\n(e.g., Delhi, Amritsar, Ludhiana)",
+            'payment_intro'       => "💳 *Booking Summary*\n\n👨‍⚕️ Doctor: {{doctor_name}}\n📅 Date: {{date}}\n🕐 Time: {{time}}\n👤 Patient: {{patient_name}}\n📍 Place: {{place}}\n💰 Consultation Fee: ₹{{amount}}\n\n*Please complete payment to confirm your appointment:*",
+            'payment_pending_msg' => "⏳ After payment, your booking will be confirmed automatically.\n\nIf already paid, reply *paid* to check status.",
+            'payment_not_configured' => "✅ *Booking Received!*\n\n👨‍⚕️ Doctor: {{doctor_name}}\n📅 Date: {{date}}\n🕐 Time: {{time}}\n👤 Patient: {{patient_name}}\n📍 Place: {{place}}\n🔖 Booking #: {{appointment_number}}\n\nOur team will contact you to confirm. Thank you! 🙏",
+            'booking_confirmed_doc'  => "✅ *Appointment Confirmed!*\n\n👨‍⚕️ Doctor: {{doctor_name}}\n📅 Date: {{date}}\n🕐 Time: {{time}}\n👤 Patient: {{patient_name}}\n📍 Place: {{place}}\n🔖 Booking #: {{appointment_number}}\n\nPlease arrive 10 minutes early. We look forward to seeing you! 🙏",
+            'payment_not_done'    => "❌ *Booking Not Confirmed*\n\n📌 Reason: Payment not received yet.\n\nPlease complete payment using the link sent above, or send *menu* to start again.\n\nFor help, contact us directly.",
+            'checking_payment'    => "🔍 Checking payment status...",
+            'payment_verified'    => "✅ Payment received! Confirming your booking...",
             'welcome'             => "👋 Welcome to *{{business_name}}*!",
             'setting_up'          => "We're currently setting up our services. Please check back soon.",
             'choose_category'     => "Browse our services and select a category:",
@@ -405,6 +416,17 @@ function waStrings(): array {
         ],
         'hi' => [
             'choose_language'     => "🌐 कृपया अपनी भाषा चुनें:",
+            'choose_doctor'       => "👨‍⚕️ कृपया एक डॉक्टर चुनें:",
+            'select_doctor'       => "डॉक्टर चुनें",
+            'no_doctors'          => "क्षमा करें, अभी कोई डॉक्टर उपलब्ध नहीं है।\n\nकृपया बाद में पुनः प्रयास करें।",
+            'ask_place'           => "📍 कृपया अपना शहर या क्षेत्र बताएं:\n(जैसे: दिल्ली, अमृतसर, लुधियाना)",
+            'payment_intro'       => "💳 *बुकिंग विवरण*\n\n👨‍⚕️ डॉक्टर: {{doctor_name}}\n📅 तारीख: {{date}}\n🕐 समय: {{time}}\n👤 मरीज़: {{patient_name}}\n📍 स्थान: {{place}}\n💰 परामर्श शुल्क: ₹{{amount}}\n\n*अपॉइंटमेंट कन्फर्म करने के लिए भुगतान करें:*",
+            'payment_pending_msg' => "⏳ भुगतान के बाद आपकी बुकिंग स्वतः कन्फर्म हो जाएगी।\n\nअगर भुगतान हो गया है तो *paid* लिखें।",
+            'payment_not_configured' => "✅ *बुकिंग प्राप्त हुई!*\n\n👨‍⚕️ डॉक्टर: {{doctor_name}}\n📅 तारीख: {{date}}\n🕐 समय: {{time}}\n👤 मरीज़: {{patient_name}}\n📍 स्थान: {{place}}\n🔖 बुकिंग नंबर: {{appointment_number}}\n\nहमारी टीम जल्द संपर्क करेगी। धन्यवाद! 🙏",
+            'booking_confirmed_doc'  => "✅ *अपॉइंटमेंट कन्फर्म!*\n\n👨‍⚕️ डॉक्टर: {{doctor_name}}\n📅 तारीख: {{date}}\n🕐 समय: {{time}}\n👤 मरीज़: {{patient_name}}\n📍 स्थान: {{place}}\n🔖 बुकिंग नंबर: {{appointment_number}}\n\n10 मिनट पहले पहुंचें। धन्यवाद! 🙏",
+            'payment_not_done'    => "❌ *बुकिंग कन्फर्म नहीं हुई*\n\n📌 कारण: भुगतान प्राप्त नहीं हुआ।\n\nऊपर भेजे लिंक से भुगतान करें या *menu* भेजें।",
+            'checking_payment'    => "🔍 भुगतान की स्थिति जांच रहे हैं...",
+            'payment_verified'    => "✅ भुगतान मिला! बुकिंग कन्फर्म हो रही है...",
             'welcome'             => "👋 *{{business_name}}* में आपका स्वागत है!",
             'setting_up'          => "हम अभी अपनी सेवाएं सेट कर रहे हैं। कृपया जल्द ही वापस देखें।",
             'choose_category'     => "हमारी सेवाएं देखें और एक श्रेणी चुनें:",
@@ -437,6 +459,17 @@ function waStrings(): array {
         ],
         'pa' => [
             'choose_language'     => "🌐 ਕਿਰਪਾ ਕਰਕੇ ਆਪਣੀ ਭਾਸ਼ਾ ਚੁਣੋ:",
+            'choose_doctor'       => "👨‍⚕️ ਕਿਰਪਾ ਕਰਕੇ ਡਾਕਟਰ ਚੁਣੋ:",
+            'select_doctor'       => "ਡਾਕਟਰ ਚੁਣੋ",
+            'no_doctors'          => "ਮਾਫ਼ ਕਰਨਾ, ਇਸ ਵੇਲੇ ਕੋਈ ਡਾਕਟਰ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।\n\nਕਿਰਪਾ ਕਰਕੇ ਬਾਅਦ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+            'ask_place'           => "📍 ਕਿਰਪਾ ਕਰਕੇ ਆਪਣਾ ਸ਼ਹਿਰ ਜਾਂ ਇਲਾਕਾ ਦੱਸੋ:\n(ਜਿਵੇਂ: ਦਿੱਲੀ, ਅੰਮ੍ਰਿਤਸਰ, ਲੁਧਿਆਣਾ)",
+            'payment_intro'       => "💳 *ਬੁਕਿੰਗ ਵੇਰਵਾ*\n\n👨‍⚕️ ਡਾਕਟਰ: {{doctor_name}}\n📅 ਮਿਤੀ: {{date}}\n🕐 ਸਮਾਂ: {{time}}\n👤 ਮਰੀਜ਼: {{patient_name}}\n📍 ਜਗ੍ਹਾ: {{place}}\n💰 ਫੀਸ: ₹{{amount}}\n\n*ਅਪੌਇੰਟਮੈਂਟ ਕਨਫਰਮ ਕਰਨ ਲਈ ਭੁਗਤਾਨ ਕਰੋ:*",
+            'payment_pending_msg' => "⏳ ਭੁਗਤਾਨ ਤੋਂ ਬਾਅਦ ਬੁਕਿੰਗ ਆਪਣੇ ਆਪ ਕਨਫਰਮ ਹੋ ਜਾਵੇਗੀ।\n\nਜੇ ਭੁਗਤਾਨ ਹੋ ਗਿਆ ਹੈ ਤਾਂ *paid* ਲਿਖੋ।",
+            'payment_not_configured' => "✅ *ਬੁਕਿੰਗ ਮਿਲੀ!*\n\n👨‍⚕️ ਡਾਕਟਰ: {{doctor_name}}\n📅 ਮਿਤੀ: {{date}}\n🕐 ਸਮਾਂ: {{time}}\n👤 ਮਰੀਜ਼: {{patient_name}}\n📍 ਜਗ੍ਹਾ: {{place}}\n🔖 ਬੁਕਿੰਗ ਨੰਬਰ: {{appointment_number}}\n\nਸਾਡੀ ਟੀਮ ਜਲਦੀ ਸੰਪਰਕ ਕਰੇਗੀ। ਧੰਨਵਾਦ! 🙏",
+            'booking_confirmed_doc'  => "✅ *ਅਪੌਇੰਟਮੈਂਟ ਕਨਫਰਮ!*\n\n👨‍⚕️ ਡਾਕਟਰ: {{doctor_name}}\n📅 ਮਿਤੀ: {{date}}\n🕐 ਸਮਾਂ: {{time}}\n👤 ਮਰੀਜ਼: {{patient_name}}\n📍 ਜਗ੍ਹਾ: {{place}}\n🔖 ਬੁਕਿੰਗ ਨੰਬਰ: {{appointment_number}}\n\n10 ਮਿੰਟ ਪਹਿਲਾਂ ਆਓ। ਧੰਨਵਾਦ! 🙏",
+            'payment_not_done'    => "❌ *ਬੁਕਿੰਗ ਕਨਫਰਮ ਨਹੀਂ ਹੋਈ*\n\n📌 ਕਾਰਨ: ਭੁਗਤਾਨ ਨਹੀਂ ਮਿਲਿਆ।\n\nਉੱਪਰ ਭੇਜੇ ਲਿੰਕ ਨਾਲ ਭੁਗਤਾਨ ਕਰੋ ਜਾਂ *menu* ਭੇਜੋ।",
+            'checking_payment'    => "🔍 ਭੁਗਤਾਨ ਦੀ ਸਥਿਤੀ ਜਾਂਚ ਰਹੇ ਹਾਂ...",
+            'payment_verified'    => "✅ ਭੁਗਤਾਨ ਮਿਲਿਆ! ਬੁਕਿੰਗ ਕਨਫਰਮ ਹੋ ਰਹੀ ਹੈ...",
             'welcome'             => "👋 *{{business_name}}* ਵਿੱਚ ਜੀ ਆਇਆਂ ਨੂੰ!",
             'setting_up'          => "ਅਸੀਂ ਇਸ ਵੇਲੇ ਆਪਣੀਆਂ ਸੇਵਾਵਾਂ ਸੈੱਟਅਪ ਕਰ ਰਹੇ ਹਾਂ। ਕਿਰਪਾ ਕਰਕੇ ਜਲਦੀ ਹੀ ਦੁਬਾਰਾ ਚੈੱਕ ਕਰੋ।",
             'choose_category'     => "ਸਾਡੀਆਂ ਸੇਵਾਵਾਂ ਵੇਖੋ ਅਤੇ ਇੱਕ ਸ਼੍ਰੇਣੀ ਚੁਣੋ:",
@@ -581,6 +614,80 @@ function buildSlotMenu(array $slots): array {
     return ['slots' => $slots, 'rows' => $rows];
 }
 
+// ─── Doctor flow menu builders ─────────────────────────────────────────────────
+
+function buildDoctorMenu(int $businessId): array {
+    $stmt = db()->prepare("SELECT id, name, specialization FROM staff WHERE business_id = ? AND is_active = 1 ORDER BY name");
+    $stmt->execute([$businessId]);
+    $doctors = $stmt->fetchAll();
+
+    $ids = []; $rows = [];
+    foreach ($doctors as $doc) {
+        $ids[]  = (int)$doc['id'];
+        $row    = ['id' => 'doc_' . $doc['id'], 'title' => mb_substr($doc['name'], 0, 24)];
+        if (!empty($doc['specialization'])) $row['description'] = mb_substr($doc['specialization'], 0, 72);
+        $rows[] = $row;
+        if (count($rows) >= 10) break;
+    }
+    return ['ids' => $ids, 'rows' => $rows];
+}
+
+function buildDocDateMenu(string $lang): array {
+    $today     = date('Y-m-d');
+    $tomorrow  = date('Y-m-d', strtotime('+1 day'));
+    $todayLbl  = wt($lang, 'today')    . ' (' . date('d M', strtotime($today))    . ')';
+    $tomorrLbl = wt($lang, 'tomorrow') . ' (' . date('d M', strtotime($tomorrow)) . ')';
+    return [
+        'dates' => [$today, $tomorrow],
+        'rows'  => [
+            ['id' => 'docdate_' . $today,    'title' => mb_substr($todayLbl,  0, 24)],
+            ['id' => 'docdate_' . $tomorrow, 'title' => mb_substr($tomorrLbl, 0, 24)],
+        ],
+    ];
+}
+
+function buildDocSlotSections(): array {
+    $morning = [
+        ['time' => '09:00:00', 'label' => '🌅 9:00 AM'],
+        ['time' => '09:30:00', 'label' => '🌅 9:30 AM'],
+        ['time' => '10:00:00', 'label' => '🌅 10:00 AM'],
+        ['time' => '10:30:00', 'label' => '🌅 10:30 AM'],
+        ['time' => '11:00:00', 'label' => '🌅 11:00 AM'],
+        ['time' => '11:30:00', 'label' => '🌅 11:30 AM'],
+    ];
+    $evening = [
+        ['time' => '17:00:00', 'label' => '🌇 5:00 PM'],
+        ['time' => '17:30:00', 'label' => '🌇 5:30 PM'],
+        ['time' => '18:00:00', 'label' => '🌇 6:00 PM'],
+        ['time' => '18:30:00', 'label' => '🌇 6:30 PM'],
+    ];
+    $allSlots = array_merge($morning, $evening);
+    return [
+        'slots'    => $allSlots,
+        'sections' => [
+            ['title' => '🌅 Morning  9 AM – 12 PM', 'rows' => array_map(fn($s) => ['id' => 'slot_' . $s['time'], 'title' => $s['label']], $morning)],
+            ['title' => '🌇 Evening  5 PM – 7 PM',  'rows' => array_map(fn($s) => ['id' => 'slot_' . $s['time'], 'title' => $s['label']], $evening)],
+        ],
+    ];
+}
+
+function getDoctorConsultationService(int $businessId, int $staffId): ?array {
+    $stmt = db()->prepare("
+        SELECT s.* FROM services s
+        INNER JOIN service_staff ss ON ss.service_id = s.id
+        WHERE ss.staff_id = ? AND s.business_id = ? AND s.is_active = 1
+        ORDER BY s.id ASC LIMIT 1
+    ");
+    $stmt->execute([$staffId, $businessId]);
+    $svc = $stmt->fetch();
+    if ($svc) return $svc;
+
+    // Fallback: any active service of the business
+    $stmt = db()->prepare("SELECT * FROM services WHERE business_id = ? AND is_active = 1 ORDER BY id ASC LIMIT 1");
+    $stmt->execute([$businessId]);
+    return $stmt->fetch() ?: null;
+}
+
 // ─── Selection helper ───────────────────────────────────────────────────────────
 
 /**
@@ -616,6 +723,20 @@ function sendCategoryMenu(int $businessId, string $fromPhone, string $lang, stri
     $body = wt($lang, 'welcome', ['business_name' => $businessName]) . "\n\n" . wt($lang, 'choose_category') . "\n" . wt($lang, 'tap_to_explore');
     sendWhatsappInteractiveList($businessId, $fromPhone, $body, wt($lang, 'view_menu'), [['rows' => $menu['rows']]]);
     saveWhatsappSession($businessId, $fromPhone, 'awaiting_category', array_merge($data, ['category_ids' => $menu['ids']]));
+}
+
+function sendDoctorMenu(int $businessId, string $fromPhone, string $lang, string $businessName, array $data): void {
+    $menu = buildDoctorMenu($businessId);
+
+    if (empty($menu['rows'])) {
+        sendWhatsappMessage($businessId, $fromPhone, wt($lang, 'no_doctors'));
+        saveWhatsappSession($businessId, $fromPhone, 'idle', $data);
+        return;
+    }
+
+    $body = wt($lang, 'welcome', ['business_name' => $businessName]) . "\n\n" . wt($lang, 'choose_doctor');
+    sendWhatsappInteractiveList($businessId, $fromPhone, $body, wt($lang, 'select_doctor'), [['rows' => $menu['rows']]]);
+    saveWhatsappSession($businessId, $fromPhone, 'awaiting_doctor', array_merge($data, ['doctor_ids' => $menu['ids']]));
 }
 
 function waLanguageButtons(int $businessId, string $fromPhone): void {
@@ -711,7 +832,7 @@ function processIncomingMessage(int $businessId, string $fromPhone, string $text
                 return;
             }
 
-            sendCategoryMenu($businessId, $fromPhone, $lang, $businessName, $data);
+            sendDoctorMenu($businessId, $fromPhone, $lang, $businessName, $data);
             break;
 
         case 'awaiting_language':
@@ -734,8 +855,224 @@ function processIncomingMessage(int $businessId, string $fromPhone, string $text
                 db()->prepare("UPDATE customers SET language = ? WHERE business_id = ? AND phone = ?")->execute([$lang, $businessId, $fromPhone]);
             } catch (Exception $e) {}
 
-            sendCategoryMenu($businessId, $fromPhone, $lang, $businessName, $data);
+            sendDoctorMenu($businessId, $fromPhone, $lang, $businessName, $data);
             break;
+
+        // ── Doctor flow states ─────────────────────────────────────────────────
+
+        case 'awaiting_doctor':
+            $menu     = buildDoctorMenu($businessId);
+            $doctorId = waResolveSelection($sel, 'doc_', $data['doctor_ids'] ?? $menu['ids']);
+
+            if ($doctorId === null) {
+                sendWhatsappInteractiveList($businessId, $fromPhone, wt($lang, 'invalid_option') . "\n\n" . wt($lang, 'choose_doctor'), wt($lang, 'select_doctor'), [['rows' => $menu['rows']]]);
+                saveWhatsappSession($businessId, $fromPhone, 'awaiting_doctor', array_merge($data, ['doctor_ids' => $menu['ids']]));
+                break;
+            }
+
+            $doctorId = (int)$doctorId;
+            $stmt = db()->prepare("SELECT name, specialization FROM staff WHERE id = ? AND business_id = ?");
+            $stmt->execute([$doctorId, $businessId]);
+            $doctor = $stmt->fetch();
+
+            $dateMenu = buildDocDateMenu($lang);
+            sendWhatsappInteractiveButtons($businessId, $fromPhone, wt($lang, 'choose_date'), $dateMenu['rows'], '📅 ' . ($doctor['name'] ?? ''));
+            saveWhatsappSession($businessId, $fromPhone, 'awaiting_date_doc', array_merge($data, [
+                'doctor_id'   => $doctorId,
+                'doctor_name' => $doctor['name'] ?? '',
+                'dates'       => $dateMenu['dates'],
+            ]));
+            break;
+
+        case 'awaiting_date_doc':
+            $dateMenu = buildDocDateMenu($lang);
+            $date     = waResolveSelection($sel, 'docdate_', $data['dates'] ?? $dateMenu['dates']);
+
+            if ($date === null && in_array($lower, ['today', 'aaj', 'ਅੱਜ', 'आज'], true)) {
+                $date = date('Y-m-d');
+            } elseif ($date === null && in_array($lower, ['tomorrow', 'kal', 'ਕੱਲ੍ਹ', 'कल'], true)) {
+                $date = date('Y-m-d', strtotime('+1 day'));
+            }
+
+            if ($date === null) {
+                sendWhatsappInteractiveButtons($businessId, $fromPhone, wt($lang, 'invalid_option') . "\n\n" . wt($lang, 'choose_date'), $dateMenu['rows']);
+                saveWhatsappSession($businessId, $fromPhone, 'awaiting_date_doc', array_merge($data, ['dates' => $dateMenu['dates']]));
+                break;
+            }
+
+            $slotData = buildDocSlotSections();
+            sendWhatsappInteractiveList(
+                $businessId, $fromPhone,
+                wt($lang, 'choose_time', ['date' => formatDate($date)]),
+                wt($lang, 'select_time'),
+                $slotData['sections']
+            );
+            saveWhatsappSession($businessId, $fromPhone, 'awaiting_slot_doc', array_merge($data, [
+                'date'  => $date,
+                'slots' => $slotData['slots'],
+            ]));
+            break;
+
+        case 'awaiting_slot_doc':
+            $slots   = $data['slots'] ?? buildDocSlotSections()['slots'];
+            $slotIds = array_column($slots, 'time');
+            $time    = waResolveSelection($sel, 'slot_', $slotIds);
+
+            if ($time === null) {
+                $slotData = buildDocSlotSections();
+                sendWhatsappInteractiveList($businessId, $fromPhone, wt($lang, 'invalid_option') . "\n\n" . wt($lang, 'choose_time', ['date' => formatDate($data['date'] ?? date('Y-m-d'))]), wt($lang, 'select_time'), $slotData['sections']);
+                saveWhatsappSession($businessId, $fromPhone, 'awaiting_slot_doc', array_merge($data, ['slots' => $slotData['slots']]));
+                break;
+            }
+
+            sendWhatsappMessage($businessId, $fromPhone, wt($lang, 'ask_name'));
+            saveWhatsappSession($businessId, $fromPhone, 'awaiting_patient_name', array_merge($data, ['time' => $time]));
+            break;
+
+        case 'awaiting_patient_name':
+            if ($raw === '') {
+                sendWhatsappMessage($businessId, $fromPhone, wt($lang, 'name_required'));
+                break;
+            }
+            sendWhatsappMessage($businessId, $fromPhone, wt($lang, 'ask_place'));
+            saveWhatsappSession($businessId, $fromPhone, 'awaiting_place', array_merge($data, ['patient_name' => $raw]));
+            break;
+
+        case 'awaiting_place':
+            if ($raw === '') {
+                sendWhatsappMessage($businessId, $fromPhone, wt($lang, 'ask_place'));
+                break;
+            }
+
+            $doctorId   = (int)($data['doctor_id'] ?? 0);
+            $doctorName = $data['doctor_name'] ?? '';
+            $date       = $data['date'] ?? date('Y-m-d');
+            $time       = $data['time'] ?? '09:00:00';
+            $patientName = $data['patient_name'] ?? $raw;
+            $place      = $raw;
+
+            // Find service
+            $service = getDoctorConsultationService($businessId, $doctorId);
+            $serviceId  = $service ? (int)$service['id'] : null;
+            $fee        = $service ? (float)$service['price'] : 0.0;
+            $duration   = $service ? (int)$service['duration'] : 30;
+            $endTime    = minutesToTime(timeToMinutes($time) + $duration);
+            $timeLabel  = date('g:i A', strtotime($time));
+
+            // Check wallet
+            if (!hasEnoughBalance($businessId)) {
+                sendWhatsappMessage($businessId, $fromPhone, wt($lang, 'something_wrong'));
+                resetWhatsappSession($businessId, $fromPhone);
+                break;
+            }
+
+            // Upsert customer
+            $customerId = findOrCreateCustomer($businessId, $fromPhone, $patientName);
+            try { db()->prepare("UPDATE customers SET language = ? WHERE id = ? AND language IS NULL")->execute([$lang, $customerId]); } catch (Exception $e) {}
+
+            // Create appointment (pending_payment)
+            $stmt = db()->prepare("
+                INSERT INTO appointments (business_id, customer_id, service_id, staff_id, appointment_date, appointment_time, end_time, duration, status, total_price, payment_status, booking_source)
+                VALUES (?,?,?,?,?,?,?,?, 'pending_payment', ?, 'unpaid', 'whatsapp')
+            ");
+            $stmt->execute([$businessId, $customerId, $serviceId, $doctorId ?: null, $date, $time, $endTime, $duration, $fee]);
+            $appointmentId = (int)db()->lastInsertId();
+
+            deductBookingFee($businessId, $appointmentId);
+
+            $apptNum = formatAppointmentNumber($appointmentId);
+
+            // Try Razorpay payment link
+            require_once __DIR__ . '/payment.php';
+            $paymentLink = null;
+            if ($fee > 0) {
+                $desc        = "Consultation - {$doctorName} - {$date}";
+                $paymentLink = createRazorpayPaymentLink($businessId, $fee, $desc, $fromPhone, $patientName, $appointmentId);
+            }
+
+            $vars = [
+                'doctor_name'        => $doctorName,
+                'date'               => formatDate($date),
+                'time'               => $timeLabel,
+                'patient_name'       => $patientName,
+                'place'              => $place,
+                'amount'             => number_format($fee, 0),
+                'appointment_number' => $apptNum,
+            ];
+
+            if ($paymentLink) {
+                $msg = wt($lang, 'payment_intro', $vars) . "\n\n👇 " . $paymentLink . "\n\n" . wt($lang, 'payment_pending_msg');
+                sendWhatsappMessage($businessId, $fromPhone, $msg);
+                saveWhatsappSession($businessId, $fromPhone, 'awaiting_payment', array_merge($data, [
+                    'appointment_id'  => $appointmentId,
+                    'doctor_name'     => $doctorName,
+                    'patient_name'    => $patientName,
+                    'place'           => $place,
+                    'date'            => $date,
+                    'time'            => $timeLabel,
+                    'amount'          => $fee,
+                    'payment_link'    => $paymentLink,
+                    'appt_num'        => $apptNum,
+                ]), $appointmentId);
+            } else {
+                // No payment gateway — create as pending, notify
+                db()->prepare("UPDATE appointments SET status='pending' WHERE id=?")->execute([$appointmentId]);
+                sendWhatsappMessage($businessId, $fromPhone, wt($lang, 'payment_not_configured', $vars));
+                saveWhatsappSession($businessId, $fromPhone, 'idle', ['lang' => $lang], $appointmentId);
+            }
+
+            // Notify admin
+            try {
+                db()->prepare("
+                    INSERT INTO notifications (business_id, type, title, message, action_url, related_id, related_type)
+                    VALUES (?, 'new_booking', 'New Doctor Appointment', ?, 'appointments.php', ?, 'appointment')
+                ")->execute([$businessId, "{$patientName} → {$doctorName} on {$date} at {$timeLabel} from {$place}", $appointmentId]);
+            } catch (Exception $e) {}
+            break;
+
+        case 'awaiting_payment':
+            $payTriggers = ['paid', 'pay', 'done', 'payment done', 'payment', 'ਪੇਮੈਂਟ', 'ਭੁਗਤਾਨ', 'भुगतान', 'पेमेंट'];
+            $appointmentId = (int)($data['appointment_id'] ?? ($session['appointment_id'] ?? 0));
+
+            if (!in_array($lower, $payTriggers, true)) {
+                // Not a payment check trigger — remind them
+                sendWhatsappMessage($businessId, $fromPhone,
+                    wt($lang, 'payment_pending_msg') . "\n\n" . ($data['payment_link'] ?? '')
+                );
+                break;
+            }
+
+            if (!$appointmentId) {
+                sendWhatsappMessage($businessId, $fromPhone, wt($lang, 'something_wrong'));
+                resetWhatsappSession($businessId, $fromPhone);
+                break;
+            }
+
+            sendWhatsappMessage($businessId, $fromPhone, wt($lang, 'checking_payment'));
+
+            // Check appointment payment_status in DB (webhook may have already updated it)
+            $stmt = db()->prepare("SELECT status, payment_status FROM appointments WHERE id = ? AND business_id = ?");
+            $stmt->execute([$appointmentId, $businessId]);
+            $apptRow = $stmt->fetch();
+
+            if ($apptRow && in_array($apptRow['payment_status'], ['paid', 'completed'], true)) {
+                // Already confirmed by webhook
+                $vars = [
+                    'doctor_name'        => $data['doctor_name'] ?? '',
+                    'date'               => $data['date'] ?? '',
+                    'time'               => $data['time'] ?? '',
+                    'patient_name'       => $data['patient_name'] ?? '',
+                    'place'              => $data['place'] ?? '',
+                    'appointment_number' => $data['appt_num'] ?? formatAppointmentNumber($appointmentId),
+                ];
+                sendWhatsappMessage($businessId, $fromPhone, wt($lang, 'booking_confirmed_doc', $vars));
+                saveWhatsappSession($businessId, $fromPhone, 'idle', ['lang' => $lang], $appointmentId);
+            } else {
+                sendWhatsappMessage($businessId, $fromPhone, wt($lang, 'payment_not_done'));
+            }
+            break;
+
+        // ── Legacy category-based flow (preserved for backward compat) ──────────
 
         case 'awaiting_category':
             $menu = buildCategoryMenu($businessId);
